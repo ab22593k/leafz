@@ -19,62 +19,10 @@ class AppTextStyles {
     letterSpacing: -1.0,
   );
 
-  static TextStyle get title => const TextStyle(
-    fontSize: 25,
-    fontWeight: FontWeight.w400,
-    height: 32 / 25,
-    letterSpacing: -1.0,
-  );
-
-  static TextStyle get h1 => const TextStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.w700,
-    height: 24 / 18,
-    letterSpacing: -1.0,
-  );
-
-  static TextStyle get h1Bold => const TextStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.w700,
-    height: 24 / 18,
-    letterSpacing: -1.0,
-  );
-
   static TextStyle get h2 => const TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w400,
     height: 22 / 16,
-    letterSpacing: -1.0,
-  );
-
-  static TextStyle get h3 => const TextStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.w700,
-    height: 24 / 18,
-    letterSpacing: -1.0,
-  );
-
-  static TextStyle get body => const TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w400,
-    height: 20 / 14,
-    letterSpacing: -1.0,
-  );
-
-  static TextStyle get bodyBold => const TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w700,
-    height: 20 / 14,
-    letterSpacing: -1.0,
-  );
-
-  static TextStyle get bodySm =>
-      const TextStyle(fontSize: 14, letterSpacing: -0.5);
-
-  static TextStyle get bodyXs => const TextStyle(
-    fontSize: 11,
-    fontWeight: FontWeight.w400,
-    height: 16 / 11,
     letterSpacing: -1.0,
   );
 
@@ -91,13 +39,6 @@ class AppTextStyles {
     height: 1,
     letterSpacing: -1.0,
     fontFamily: 'OpenDyslexic',
-  );
-
-  static TextStyle get buttonSm => const TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.w600,
-    height: 1,
-    letterSpacing: -1.0,
   );
 
   static TextStyle get displayLarge => const TextStyle(
@@ -128,12 +69,10 @@ class AppTextStyles {
     letterSpacing: -1.0,
   );
 
-  static TextStyle get headlineMedium => const TextStyle(
-    fontSize: 32,
-    fontWeight: FontWeight.w400,
-    height: 40 / 32,
-    letterSpacing: -1.0,
-  );
+  /// Same value as [headlineLarge] — kept as a named alias so the M3
+  /// `headlineMedium` theme slot shares the editorial headline metric
+  /// (32px, 1.2 line height) instead of a near-duplicate 1.25.
+  static TextStyle get headlineMedium => headlineLarge;
 
   static TextStyle get headlineSmall => const TextStyle(
     fontSize: 24,
@@ -191,12 +130,9 @@ class AppTextStyles {
     letterSpacing: -1.0,
   );
 
-  static TextStyle get bodyMedium => const TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w400,
-    height: 1.6,
-    letterSpacing: -1.0,
-  );
+  /// Same value as [bodyLarge] — kept as a named alias so the M3
+  /// `bodyMedium` theme slot has a single source of truth.
+  static TextStyle get bodyMedium => bodyLarge;
 
   static TextStyle get bodySmall => const TextStyle(
     fontSize: 11,

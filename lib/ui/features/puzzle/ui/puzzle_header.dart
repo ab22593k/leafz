@@ -184,32 +184,48 @@ class PuzzleHeader extends ConsumerWidget {
   }
 
   Widget _compactLayout(ColorScheme colorScheme) {
+    // All three stats render as peers: one shared value style and one icon
+    // size, so the timer no longer towers over moves/correct. The value
+    // style keeps color semantics (progress tint on correct tiles, error
+    // on a critical countdown) intact.
+    final statStyle = AppTextStyles.labelLarge.copyWith(
+      color: colorScheme.onSurface,
+      fontVariations: const [FontVariation('wght', 700)],
+    );
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        const PuzzleStopWatch(),
+        PuzzleStopWatch(textStyle: statStyle, iconSize: 14),
         _statChip(
           HugeIcon(
             icon: HugeIcons.strokeRoundedArrowUpDown,
             size: 14,
             color: colorScheme.onSurface.withValues(alpha: 0.6),
           ),
-          const MovesCount(),
+          MovesCount(textStyle: statStyle),
           colorScheme,
         ),
-        CorrectTilesCount(colorScheme: colorScheme),
+        CorrectTilesCount(colorScheme: colorScheme, textStyle: statStyle),
       ],
     );
   }
 
   Widget _sidePaneLayout(ColorScheme colorScheme, AppLocalizations l10n) {
+    // The pane's labeled rows already claim a shared value style via
+    // DefaultTextStyle, but the stat widgets set explicit styles internally
+    // — so pass it down explicitly to make the 18px treatment actually
+    // render for all three stats.
+    final statStyle = AppTextStyles.titleMedium.copyWith(
+      color: colorScheme.onSurface,
+      fontVariations: const [FontVariation('wght', 700)],
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _labeledStatRow(
           icon: const HugeIcon(icon: HugeIcons.strokeRoundedClock01, size: 16),
           label: l10n.time,
-          child: const PuzzleStopWatch(showIcon: false),
+          child: PuzzleStopWatch(showIcon: false, textStyle: statStyle),
           colorScheme: colorScheme,
         ),
         const SizedBox(height: 16),
@@ -220,7 +236,7 @@ class PuzzleHeader extends ConsumerWidget {
             color: colorScheme.onSurface.withValues(alpha: 0.6),
           ),
           label: l10n.moves,
-          child: const MovesCount(),
+          child: MovesCount(textStyle: statStyle),
           colorScheme: colorScheme,
         ),
         const SizedBox(height: 16),
@@ -231,7 +247,11 @@ class PuzzleHeader extends ConsumerWidget {
             color: colorScheme.onSurface.withValues(alpha: 0.6),
           ),
           label: l10n.correct,
-          child: CorrectTilesCount(colorScheme: colorScheme, showIcon: false),
+          child: CorrectTilesCount(
+            colorScheme: colorScheme,
+            showIcon: false,
+            textStyle: statStyle,
+          ),
           colorScheme: colorScheme,
         ),
       ],

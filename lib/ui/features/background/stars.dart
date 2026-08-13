@@ -47,7 +47,8 @@ class _StarsState extends State<Stars> with SingleTickerProviderStateMixin {
       screenTypeHelper: ScreenTypeHelper(widget.size.width, widget.size.height),
       starsMaxXOffset: widget.size.width,
       starsMaxYOffset: widget.size.height,
-    )..starColor = colorScheme.onSurface;
+      starColor: colorScheme.onSurface,
+    );
 
     return CustomPaint(painter: starsLayout.getPainter(opacity: _opacity));
   }

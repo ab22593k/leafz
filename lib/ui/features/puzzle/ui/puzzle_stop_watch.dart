@@ -8,12 +8,24 @@ import 'package:hugeicons/hugeicons.dart';
 class PuzzleStopWatch extends ConsumerWidget {
   final bool showIcon;
 
-  const PuzzleStopWatch({super.key, this.showIcon = true});
+  /// Value style. Null uses the widget's default [AppTextStyles.titleMedium]
+  /// treatment; callers pass a shared style so the header stats render as
+  /// consistent peers across layouts.
+  final TextStyle? textStyle;
+
+  final double iconSize;
+
+  const PuzzleStopWatch({
+    super.key,
+    this.showIcon = true,
+    this.textStyle,
+    this.iconSize = 16,
+  });
 
   Widget _textWidget(String text, Color color) {
     return Text(
       text,
-      style: AppTextStyles.titleMedium.copyWith(
+      style: (textStyle ?? AppTextStyles.titleMedium).copyWith(
         color: color,
         fontVariations: const [FontVariation('wght', 700)],
       ),
@@ -42,7 +54,7 @@ class PuzzleStopWatch extends ConsumerWidget {
           icon: isExpired
               ? HugeIcons.strokeRoundedStopWatch
               : HugeIcons.strokeRoundedTimer01,
-          size: 16,
+          size: iconSize,
           color: iconColor,
         ),
         text: text,
@@ -54,7 +66,11 @@ class PuzzleStopWatch extends ConsumerWidget {
       Duration(seconds: sw.secondsElapsed),
     );
     return _timerDisplay(
-      icon: const HugeIcon(icon: HugeIcons.strokeRoundedClock01, size: 16),
+      icon: HugeIcon(
+        icon: HugeIcons.strokeRoundedClock01,
+        size: iconSize,
+        color: colorScheme.onSurface,
+      ),
       text: text,
       textColor: colorScheme.onSurface,
     );

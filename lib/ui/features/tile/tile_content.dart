@@ -56,7 +56,8 @@ class _TileContentState extends State<TileContent>
       // translucent surface lets the aurora shader glow through every tile.
       ClipRect(
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          // Same 20px glass blur as the board, per DESIGN.md.
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Padding(
             padding: const EdgeInsets.all(1.5),
             child: Container(

@@ -15,9 +15,12 @@ class StarsLayout implements LayoutDelegate {
     required this.screenTypeHelper,
     required this.starsMaxXOffset,
     required this.starsMaxYOffset,
+    required this.starColor,
   });
 
-  Color starColor = Colors.white60;
+  /// Star color, always supplied by the caller (theme-aware `onSurface` in
+  /// [Stars]); a required param so there is no silent unthemed default.
+  final Color starColor;
 
   int get totalStarsCount => switch (screenTypeHelper.windowClass) {
     WindowClass.compact => 300,

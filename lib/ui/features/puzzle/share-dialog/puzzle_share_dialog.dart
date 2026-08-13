@@ -15,8 +15,6 @@ class PuzzleSolvedDialog extends StatelessWidget {
     required this.movesCount,
   });
 
-  String get imageName => 'solved.jpg';
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
@@ -31,9 +29,12 @@ class PuzzleSolvedDialog extends StatelessWidget {
     );
   }
 
+  /// The celebration image, bundled under `assets/images/solved/` (see
+  /// pubspec) and precached at startup — the earlier `puzzle-solved/`
+  /// path pointed at a directory that doesn't exist and never rendered.
   Widget get _puzzleSolvedImage => ClipRRect(
     borderRadius: BorderRadius.zero,
-    child: Image.asset('assets/images/puzzle-solved/$imageName'),
+    child: Image.asset('assets/images/solved/solved.jpg'),
   );
 
   Widget get _puzzleScoreWidget => PuzzleScore(

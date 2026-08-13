@@ -8,7 +8,17 @@ class CorrectTilesCount extends ConsumerWidget {
   final ColorScheme? colorScheme;
   final bool showIcon;
 
-  const CorrectTilesCount({super.key, this.colorScheme, this.showIcon = true});
+  /// Value style. Null uses the widget's default [AppTextStyles.labelSmall]
+  /// treatment; callers pass a shared style so the header stats render as
+  /// consistent peers across layouts.
+  final TextStyle? textStyle;
+
+  const CorrectTilesCount({
+    super.key,
+    this.colorScheme,
+    this.showIcon = true,
+    this.textStyle,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,7 +39,7 @@ class CorrectTilesCount extends ConsumerWidget {
           if (showIcon) ...[_progressIcon(ratio, cs), const SizedBox(width: 4)],
           Text(
             '$correct/$total',
-            style: AppTextStyles.labelSmall.copyWith(
+            style: (textStyle ?? AppTextStyles.labelSmall).copyWith(
               color: _progressColor(ratio, cs),
               fontVariations: const [FontVariation('wght', 700)],
             ),
@@ -39,12 +49,17 @@ class CorrectTilesCount extends ConsumerWidget {
     );
   }
 
+  /// Maps completion onto the brand's monochrome tonal ladder instead of
+  /// saturated hues: the piece gains definition (faint -> tertiary ->
+  /// secondary -> primary) as it locks into place, peaking at a solid
+  /// "seal" when solved. Shape + text still carry the state, so the ladder
+  /// stays legible in both themes and under dynamic color.
   Color _progressColor(double ratio, ColorScheme colorScheme) =>
       switch (ratio) {
-        >= 1.0 => const Color(0xff2e7d32),
-        >= 0.75 => const Color(0xffb8860b),
-        >= 0.5 => colorScheme.secondary,
-        _ => colorScheme.primary,
+        >= 1.0 => colorScheme.primary,
+        >= 0.75 => colorScheme.secondary,
+        >= 0.5 => colorScheme.tertiary,
+        _ => colorScheme.onSurface.withValues(alpha: 0.4),
       };
 
   Widget _progressIcon(double ratio, ColorScheme colorScheme) {
@@ -57,10 +72,10 @@ class CorrectTilesCount extends ConsumerWidget {
           color: color,
           borderRadius: BorderRadius.zero,
         ),
-        child: const HugeIcon(
+        child: HugeIcon(
           icon: HugeIcons.strokeRoundedStarAward01,
           size: 10,
-          color: Colors.white,
+          color: colorScheme.onPrimary,
         ),
       ),
       >= 0.75 => Container(

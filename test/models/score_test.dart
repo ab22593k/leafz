@@ -36,7 +36,7 @@ void main() {
     });
 
     test('toJson omits null timestamp', () {
-      final score = const Score(
+      const score = Score(
         secondsElapsed: 0,
         movesCount: 0,
         puzzleSize: 3,

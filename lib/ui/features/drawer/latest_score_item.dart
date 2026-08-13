@@ -138,9 +138,12 @@ class LatestScoreItem extends StatelessWidget {
     );
   }
 
+  /// Best-score medal follows the monochrome ladder: exceptional runs get
+  /// the full-strength primary tone, good runs secondary, everything else
+  /// fades toward the surface.
   Color _medalColorFor(ColorScheme colorScheme) => switch (score.movesCount) {
-    <= 30 => const Color(0xffb8860b),
-    <= 60 => const Color(0xff595959),
+    <= 30 => colorScheme.primary,
+    <= 60 => colorScheme.secondary,
     _ => colorScheme.onSurface.withValues(alpha: 0.4),
   };
 

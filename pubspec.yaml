@@ -54,6 +54,8 @@ flutter:
   generate: true
   uses-material-design: true
   assets:
+    # Flutter directory entries are non-recursive — each subdirectory
+    # must be listed explicitly.
     - assets/images/
     - assets/images/solved/
     - assets/images/background/

@@ -112,7 +112,10 @@ class _PuzzleBoardState extends ConsumerState<PuzzleBoard> {
             // fragment-shader background inside the puzzle while a scrim of
             // surfaceContainer keeps the numbered tiles legible.
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+              // Per DESIGN.md: glass surfaces blur at 20px, and any required
+              // boundary uses the "ghost border" fallback — outline-variant
+              // at 15% opacity, never a solid line.
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
               child: Container(
                 key: const ValueKey('puzzle_board'),
                 width: widget.containerWidth,
@@ -121,7 +124,7 @@ class _PuzzleBoardState extends ConsumerState<PuzzleBoard> {
                   borderRadius: BorderRadius.zero,
                   color: colorScheme.surfaceContainer.withValues(alpha: 0.55),
                   border: Border.all(
-                    color: colorScheme.outlineVariant.withValues(alpha: 0.18),
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.15),
                     width: 1,
                   ),
                 ),

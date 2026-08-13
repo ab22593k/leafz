@@ -59,7 +59,7 @@ class PuzzleScore extends StatelessWidget {
               const SizedBox(width: 5),
               Text(
                 DurationHelper.toFormattedTime(duration),
-                style: AppTextStyles.h1Bold,
+                style: AppTextStyles.titleLarge,
               ),
             ],
           ),
@@ -67,7 +67,7 @@ class PuzzleScore extends StatelessWidget {
         Expanded(
           child: Text(
             context.l10n.movesCountLabel(movesCount),
-            style: AppTextStyles.h1Bold,
+            style: AppTextStyles.titleLarge,
           ),
         ),
       ],
