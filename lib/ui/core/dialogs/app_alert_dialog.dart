@@ -1,6 +1,5 @@
-import 'dart:ui';
-
 import 'package:leafz/helpers/localizations_ext.dart';
+import 'package:leafz/ui/core/layout/glass.dart';
 import 'package:leafz/ui/core/layout/spacing.dart';
 import 'package:leafz/ui/core/app_text_styles.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +40,7 @@ class AppAlertDialog extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.zero,
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaY: 20, sigmaX: 20),
+              filter: AppGlass.filter,
               child: Container(
                 alignment: Alignment.center,
                 padding: const EdgeInsets.symmetric(

@@ -35,7 +35,9 @@ class StarsPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (int i = 0; i <= totalStarsCount; i++) {
+    // Exclusive upper bound: offset/size lists hold exactly
+    // [totalStarsCount] entries (indices 0..count-1).
+    for (int i = 0; i < totalStarsCount; i++) {
       _paint.color = starColor.withValues(alpha: _getStarOpacity(i));
       canvas.drawCircle(
         Offset(xOffsets[i].toDouble(), yOffsets[i].toDouble()),

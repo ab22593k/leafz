@@ -31,7 +31,11 @@ class MockStorageService extends Mock implements StorageService {}
   final storage = MockStorageService();
   // Default stubs — tests override as needed
   when(() => storage.has(any())).thenReturn(false);
-  when(() => storage.get(any())).thenReturn(null);
+  when(() => storage.get<String>(any())).thenReturn(null);
+  when(() => storage.get<int>(any())).thenReturn(null);
+  when(() => storage.get<List>(any())).thenReturn(null);
+  when(() => storage.get<Map>(any())).thenReturn(null);
+  when(() => storage.get<dynamic>(any())).thenReturn(null);
   when(() => storage.set(any(), any())).thenAnswer((_) => Future<void>.value());
   when(() => storage.remove(any())).thenAnswer((_) => Future<void>.value());
   when(() => storage.clear()).thenAnswer((_) => Future<void>.value());
@@ -133,7 +137,7 @@ void main() {
       final (container: container, storage: storage) = createContainer();
       when(() => storage.has(StorageKey.puzzle)).thenReturn(true);
       when(
-        () => storage.get(StorageKey.puzzle),
+        () => storage.get<Map>(StorageKey.puzzle),
       ).thenReturn(storedPuzzle3x3(movesCount: 7).toJson());
       when(() => storage.has(StorageKey.scores)).thenReturn(false);
 
@@ -151,7 +155,7 @@ void main() {
       final (container: container, storage: storage) = createContainer();
       when(() => storage.has(StorageKey.puzzle)).thenReturn(true);
       when(
-        () => storage.get(StorageKey.puzzle),
+        () => storage.get<Map>(StorageKey.puzzle),
       ).thenReturn(storedPuzzle3x3(movesCount: 7).toJson());
       when(() => storage.has(StorageKey.scores)).thenReturn(false);
 
@@ -177,7 +181,7 @@ void main() {
         gameMode: GameMode.classic,
       );
       when(
-        () => storage.get(StorageKey.scores),
+        () => storage.get<List>(StorageKey.scores),
       ).thenReturn(Score.toJsonList([storedScore]));
       when(() => storage.has(StorageKey.puzzle)).thenReturn(false);
 
@@ -220,7 +224,7 @@ void main() {
         // Replace tiles with the almost-solved 3x3 board by writing to
         // storage and forcing a fresh puzzle restore.
         when(() => storage.has(StorageKey.puzzle)).thenReturn(true);
-        when(() => storage.get(StorageKey.puzzle)).thenReturn(
+        when(() => storage.get<Map>(StorageKey.puzzle)).thenReturn(
           Puzzle(n: 3, tiles: almostSolvedTiles3x3(), movesCount: 0).toJson(),
         );
         notifier.generate(forceRefresh: false);
@@ -247,7 +251,9 @@ void main() {
       // Simulate a pre-stored board that needs a move
       when(() => storage.has(StorageKey.puzzle)).thenReturn(true);
       final board = Puzzle(n: 3, tiles: shuffledTiles3x3(), movesCount: 0);
-      when(() => storage.get(StorageKey.puzzle)).thenReturn(board.toJson());
+      when(
+        () => storage.get<Map>(StorageKey.puzzle),
+      ).thenReturn(board.toJson());
 
       fakeAsync((async) {
         final notifier = container.read(puzzleProvider.notifier);
@@ -271,7 +277,7 @@ void main() {
       final (container: container, storage: storage) = createContainer();
       when(() => storage.has(StorageKey.scores)).thenReturn(false);
       when(() => storage.has(StorageKey.puzzle)).thenReturn(true);
-      when(() => storage.get(StorageKey.puzzle)).thenReturn(
+      when(() => storage.get<Map>(StorageKey.puzzle)).thenReturn(
         Puzzle(n: 3, tiles: shuffledTiles3x3(), movesCount: 0).toJson(),
       );
 
@@ -294,10 +300,10 @@ void main() {
       final (container: container, storage: storage) = createContainer();
       when(() => storage.has(StorageKey.scores)).thenReturn(false);
       when(() => storage.has(StorageKey.puzzle)).thenReturn(true);
-      when(() => storage.get(StorageKey.puzzle)).thenReturn(
+      when(() => storage.get<Map>(StorageKey.puzzle)).thenReturn(
         Puzzle(n: 3, tiles: almostSolvedTiles3x3(), movesCount: 0).toJson(),
       );
-      when(() => storage.get(StorageKey.secondsElapsed)).thenReturn(null);
+      when(() => storage.get<int>(StorageKey.secondsElapsed)).thenReturn(null);
 
       fakeAsync((async) {
         final notifier = container.read(puzzleProvider.notifier);
@@ -321,7 +327,7 @@ void main() {
     test('saves score to storage when puzzle is solved', () {
       final (container: container, storage: storage) = createContainer();
       when(() => storage.has(StorageKey.scores)).thenReturn(false);
-      when(() => storage.get(StorageKey.secondsElapsed)).thenReturn(null);
+      when(() => storage.get<int>(StorageKey.secondsElapsed)).thenReturn(null);
 
       fakeAsync((async) {
         final notifier = container.read(puzzleProvider.notifier);
@@ -337,7 +343,7 @@ void main() {
     test('stores score with correct data', () {
       final (container: container, storage: storage) = createContainer();
       when(() => storage.has(StorageKey.scores)).thenReturn(false);
-      when(() => storage.get(StorageKey.secondsElapsed)).thenReturn(null);
+      when(() => storage.get<int>(StorageKey.secondsElapsed)).thenReturn(null);
 
       // Capture the stored score
       dynamic capturedScore;
@@ -577,9 +583,9 @@ void main() {
       );
       when(() => storage.has(StorageKey.scores)).thenReturn(true);
       when(
-        () => storage.get(StorageKey.scores),
+        () => storage.get<List>(StorageKey.scores),
       ).thenReturn(Score.toJsonList(scores10));
-      when(() => storage.get(StorageKey.secondsElapsed)).thenReturn(null);
+      when(() => storage.get<int>(StorageKey.secondsElapsed)).thenReturn(null);
 
       dynamic capturedScores;
       when(() => storage.set(StorageKey.scores, any())).thenAnswer((inv) {

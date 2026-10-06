@@ -17,31 +17,44 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        BackgroundStack(size: MediaQuery.sizeOf(context)),
-        const LeafzScaffold(
-          topBar: PuzzleAppBar(
-            leading: DrawerButton(),
-            actions: [
-              Padding(padding: EdgeInsets.all(8.0), child: ResetPuzzleButton()),
-            ],
-          ),
-          bottomBar: PuzzleToolbar(child: PuzzleHeader()),
-          // On expanded+ breakpoints the bottom bar is hidden, so the stats
-          // reflow into the top rail region — same information, new surface.
-          topRail: PuzzleHeader(displayMode: HeaderDisplay.topRail),
-          // On expanded+ a co-planar stats panel surfaces the labeled stats
-          // alongside the focused puzzle board. The puzzle stays single-pane
-          // (immersive) on compact/medium per MD3 "single-pane layouts focus
-          // attention on one action or view — playing a game."
-          secondaryPane: _StatsPane(),
-          secondarySizing: PaneSizing.fixed,
-          secondaryFixedWidth: PaneSnapPoints.narrow,
-          drawer: AppDrawer(),
-          body: PuzzleView(),
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = Size(
+          constraints.maxWidth,
+          constraints.maxHeight.isFinite
+              ? constraints.maxHeight
+              : MediaQuery.sizeOf(context).height,
+        );
+        return Stack(
+          children: [
+            BackgroundStack(size: size),
+            const LeafzScaffold(
+              topBar: PuzzleAppBar(
+                leading: DrawerButton(),
+                actions: [
+                  Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: ResetPuzzleButton(),
+                  ),
+                ],
+              ),
+              bottomBar: PuzzleToolbar(child: PuzzleHeader()),
+              // On expanded+ breakpoints the bottom bar is hidden, so the stats
+              // reflow into the top rail region — same information, new surface.
+              topRail: PuzzleHeader(displayMode: HeaderDisplay.topRail),
+              // On expanded+ a co-planar stats panel surfaces the labeled stats
+              // alongside the focused puzzle board. The puzzle stays single-pane
+              // (immersive) on compact/medium per MD3 "single-pane layouts focus
+              // attention on one action or view — playing a game."
+              secondaryPane: _StatsPane(),
+              secondarySizing: PaneSizing.fixed,
+              secondaryFixedWidth: PaneSnapPoints.narrow,
+              drawer: AppDrawer(),
+              body: PuzzleView(),
+            ),
+          ],
+        );
+      },
     );
   }
 }

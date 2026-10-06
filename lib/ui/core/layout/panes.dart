@@ -1,5 +1,5 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:leafz/ui/core/layout/glass.dart';
 
 /// Whether a pane has a fixed width or flexes with available space.
 ///
@@ -244,7 +244,7 @@ class FloatingPane extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.zero,
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                filter: AppGlass.filter,
                 child: Material(color: Colors.transparent, child: child),
               ),
             ),
@@ -296,7 +296,7 @@ class DockedPane extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.zero,
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            filter: AppGlass.filter,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

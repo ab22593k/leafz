@@ -36,11 +36,7 @@ void main() {
     });
 
     test('toJson omits null timestamp', () {
-      const score = Score(
-        secondsElapsed: 0,
-        movesCount: 0,
-        puzzleSize: 3,
-      );
+      const score = Score(secondsElapsed: 0, movesCount: 0, puzzleSize: 3);
       check(score.toJson().containsKey('timestamp')).isFalse();
     });
 

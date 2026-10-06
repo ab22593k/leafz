@@ -1,5 +1,5 @@
-import 'dart:ui';
 import 'package:leafz/ui/core/app_text_styles.dart';
+import 'package:leafz/ui/core/layout/glass.dart';
 import 'package:leafz/ui/core/layout/screen_type_helper.dart';
 import 'package:flutter/material.dart';
 
@@ -39,10 +39,7 @@ class PuzzleAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final wc = ScreenTypeHelper(
-      MediaQuery.sizeOf(context).width,
-      0,
-    ).windowClass;
+    final wc = context.windowClass;
     final isWide = wc != WindowClass.compact;
 
     return Container(
@@ -170,7 +167,7 @@ class PuzzleToolbar extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.zero,
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        filter: AppGlass.filter,
         child: Container(
           padding: EdgeInsets.only(
             left: 16,

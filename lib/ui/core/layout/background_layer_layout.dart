@@ -17,12 +17,10 @@ class BackgroundLayerLayout implements LayoutDelegate {
   final ScreenTypeHelper screenTypeHelper;
 
   final BackgroundLayerType type;
-  final bool isWideLayout;
 
   const BackgroundLayerLayout({
     required this.screenTypeHelper,
     required this.type,
-    required this.isWideLayout,
   });
 
   String get assetUrl => 'assets/images/background/${type.name}.png';
@@ -42,13 +40,16 @@ class BackgroundLayerLayout implements LayoutDelegate {
     BackgroundLayerType.bottomBgPlanet => const Size(112, 104),
   };
 
-  double get _scaleForWindowClass => switch (screenTypeHelper.windowClass) {
-    WindowClass.compact => 0.8,
-    WindowClass.medium => isWideLayout ? 1.0 : 1.2,
-    WindowClass.expanded => isWideLayout ? 0.9 : 1.4,
-    WindowClass.large => isWideLayout ? 1.0 : 1.7,
-    WindowClass.extraLarge => isWideLayout ? 1.1 : 2.0,
-  };
+  double get _scaleForWindowClass {
+    final isWideLayout = screenTypeHelper.isWideLayout;
+    return switch (screenTypeHelper.windowClass) {
+      WindowClass.compact => 0.8,
+      WindowClass.medium => isWideLayout ? 1.0 : 1.2,
+      WindowClass.expanded => isWideLayout ? 0.9 : 1.4,
+      WindowClass.large => isWideLayout ? 1.0 : 1.7,
+      WindowClass.extraLarge => isWideLayout ? 1.1 : 2.0,
+    };
+  }
 
   Position get outOfViewPosition {
     const extraSpace = 10.0;

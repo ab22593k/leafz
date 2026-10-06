@@ -42,11 +42,7 @@ class _PuzzleViewState extends ConsumerState<PuzzleView> {
         final windowWidth = constraints.maxWidth;
         final windowHeight = constraints.maxHeight;
         final screenTypeHelper = ScreenTypeHelper(windowWidth, windowHeight);
-        final puzzleLayout = PuzzleLayout(
-          screenTypeHelper: screenTypeHelper,
-          screenWidth: windowWidth,
-          screenHeight: windowHeight,
-        );
+        final puzzleLayout = PuzzleLayout(screenTypeHelper: screenTypeHelper);
         final containerWidth = puzzleLayout.containerWidth;
 
         return Center(

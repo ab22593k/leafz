@@ -13,10 +13,7 @@ class PuzzleSizeSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final padding = MediaQuery.paddingOf(context);
-    final wc = ScreenTypeHelper(
-      MediaQuery.sizeOf(context).width,
-      0,
-    ).windowClass;
+    final wc = context.windowClass;
     final colorScheme = Theme.of(context).colorScheme;
     double drawerStartPadding = padding.left == 0 ? Spacing.md : padding.left;
 

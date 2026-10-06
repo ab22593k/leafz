@@ -16,11 +16,16 @@ class StarsLayout implements LayoutDelegate {
     required this.starsMaxXOffset,
     required this.starsMaxYOffset,
     required this.starColor,
-  });
+    Random? random,
+  }) : random = random ?? Random();
 
   /// Star color, always supplied by the caller (theme-aware `onSurface` in
   /// [Stars]); a required param so there is no silent unthemed default.
   final Color starColor;
+
+  /// Random source — injectable for deterministic tests.
+  /// Defaults to a non-seeded [Random].
+  final Random random;
 
   int get totalStarsCount => switch (screenTypeHelper.windowClass) {
     WindowClass.compact => 300,
@@ -29,8 +34,6 @@ class StarsLayout implements LayoutDelegate {
     WindowClass.large => 1000,
     WindowClass.extraLarge => 1200,
   };
-
-  final Random random = Random();
 
   List<int> get randomStarXOffsets => _getRandomStarsOffsetsList(
     starsMaxXOffset.ceil() <= 0 ? 1 : starsMaxXOffset.ceil(),
@@ -42,7 +45,7 @@ class StarsLayout implements LayoutDelegate {
 
   List<int> _getRandomStarsOffsetsList(int max) {
     List<int> offsets = [];
-    for (int i = 0; i <= totalStarsCount; i++) {
+    for (int i = 0; i < totalStarsCount; i++) {
       offsets.add(random.nextInt(max));
     }
     return offsets;
@@ -50,7 +53,7 @@ class StarsLayout implements LayoutDelegate {
 
   List<double> get randomStarSizes {
     List<double> sizes = [];
-    for (int i = 0; i <= totalStarsCount; i++) {
+    for (int i = 0; i < totalStarsCount; i++) {
       sizes.add(random.nextDouble() + 0.7);
     }
     return sizes;
@@ -58,7 +61,7 @@ class StarsLayout implements LayoutDelegate {
 
   List<int> get fadeOutStarIndices {
     List<int> indices = [];
-    for (int i = 0; i <= totalStarsCount; i++) {
+    for (int i = 0; i < totalStarsCount; i++) {
       if (i % 5 == 0) {
         indices.add(i);
       }
@@ -68,7 +71,7 @@ class StarsLayout implements LayoutDelegate {
 
   List<int> get fadeInStarIndices {
     List<int> indices = [];
-    for (int i = 0; i <= totalStarsCount; i++) {
+    for (int i = 0; i < totalStarsCount; i++) {
       if (i % 3 == 0) {
         indices.add(i);
       }

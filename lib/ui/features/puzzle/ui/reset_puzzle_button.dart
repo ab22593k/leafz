@@ -36,14 +36,7 @@ class ResetPuzzleButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final wc = ScreenTypeHelper(
-      MediaQuery.sizeOf(context).width,
-      0,
-    ).windowClass;
-    final isExpandedPlus =
-        wc == WindowClass.expanded ||
-        wc == WindowClass.large ||
-        wc == WindowClass.extraLarge;
+    final isExpandedPlus = context.isExpandedPlus;
     final colorScheme = Theme.of(context).colorScheme;
     ref.watch(puzzleProvider); // trigger rebuild on state changes
 

@@ -19,7 +19,6 @@ class BackgroundLayers {
       (i) => BackgroundLayerLayout(
         screenTypeHelper: screenTypeHelper,
         type: types[i],
-        isWideLayout: screenTypeHelper.isWideLayout,
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:leafz/ui/core/dialogs/app_alert_dialog.dart';
+import 'package:leafz/ui/core/layout/screen_type_helper.dart';
 import 'package:leafz/ui/core/layout/spacing.dart';
 import 'package:leafz/ui/features/puzzle/share-dialog/puzzle_score.dart';
 import 'package:flutter/material.dart';
@@ -17,15 +18,19 @@ class PuzzleSolvedDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final useWideLayout = screenWidth > 600;
+    final useWideLayout = context.windowClass != WindowClass.compact;
 
     return AppAlertDialog(
       insetPadding: const EdgeInsets.symmetric(
         horizontal: Spacing.screenHPadding,
         vertical: Spacing.md,
       ),
-      content: useWideLayout ? _landscapeContent : _portraitContent,
+      content: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640),
+          child: useWideLayout ? _landscapeContent : _portraitContent,
+        ),
+      ),
     );
   }
 

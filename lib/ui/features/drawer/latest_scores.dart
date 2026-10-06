@@ -14,10 +14,7 @@ class LatestScores extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final padding = MediaQuery.paddingOf(context);
-    final wc = ScreenTypeHelper(
-      MediaQuery.sizeOf(context).width,
-      0,
-    ).windowClass;
+    final wc = context.windowClass;
     final colorScheme = Theme.of(context).colorScheme;
     final double paddingLeft = padding.left == 0 ? Spacing.md : padding.left;
     final scores = ref.watch(

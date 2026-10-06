@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:leafz/helpers/localizations_ext.dart';
+import 'package:leafz/ui/core/layout/glass.dart';
 import 'package:leafz/ui/features/drawer/app_version_section.dart';
 import 'package:leafz/ui/features/drawer/dark_mode_toggle.dart';
 import 'package:leafz/ui/features/drawer/drawer_app_info.dart';
@@ -19,6 +19,12 @@ import 'package:hugeicons/hugeicons.dart';
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
+  /// Fraction of the window width used on compact/medium breakpoints.
+  static const double _drawerWidthFraction = 0.82;
+
+  /// Fixed drawer width on expanded+ breakpoints.
+  static const double _drawerMaxWidth = 500;
+
   Widget _drawerHeader(double drawerStartPadding) {
     return _DrawerHeader(drawerStartPadding: drawerStartPadding);
   }
@@ -26,7 +32,9 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final padding = MediaQuery.paddingOf(context);
-    final screenSize = MediaQuery.sizeOf(context);
+    final windowSize = MediaQuery.sizeOf(context);
+    final windowClass = context.windowClass;
+    final isWideLayout = windowSize.width > windowSize.height;
     double drawerStartPadding = padding.left == 0 ? Spacing.md : padding.left;
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -35,12 +43,16 @@ class AppDrawer extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.zero,
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaY: 20, sigmaX: 20),
+          filter: AppGlass.filter,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final drawerWidth = constraints.maxWidth > 600
-                  ? 500.0
-                  : screenSize.width * 0.82;
+              // Drawer width follows the window class, not the drawer's own
+              // constraints (which reflect the drawer, not the window).
+              final drawerWidth = switch (windowClass) {
+                WindowClass.compact ||
+                WindowClass.medium => windowSize.width * _drawerWidthFraction,
+                _ => _drawerMaxWidth,
+              };
 
               return Container(
                 width: drawerWidth,
@@ -50,11 +62,7 @@ class AppDrawer extends StatelessWidget {
                         Platform.isMacOS ||
                         Platform.isLinux
                     ? const EdgeInsets.symmetric(vertical: 16)
-                    : EdgeInsets.only(
-                        top: screenSize.width > screenSize.height
-                            ? padding.bottom
-                            : 0,
-                      ),
+                    : EdgeInsets.only(top: isWideLayout ? padding.bottom : 0),
                 decoration: BoxDecoration(
                   color: colorScheme.surfaceContainer.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.zero,
@@ -95,10 +103,7 @@ class _DrawerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wc = ScreenTypeHelper(
-      MediaQuery.sizeOf(context).width,
-      0,
-    ).windowClass;
+    final wc = context.windowClass;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -187,8 +192,6 @@ class _DrawerFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       padding: EdgeInsets.only(
         left: drawerStartPadding,
@@ -196,17 +199,13 @@ class _DrawerFooter extends StatelessWidget {
         top: Spacing.sm,
         bottom: Spacing.md + MediaQuery.paddingOf(context).bottom / 2,
       ),
-      child: Row(
+      child: const Row(
+        // Version pinned left, attribution right — the decorative rocket
+        // was an icon-for-icons'-sake (DESIGN.md: no non-functional icons).
         children: [
-          const Expanded(child: AppVersionSection()),
-          const SizedBox(width: 8),
-          const DrawerAppInfo(),
-          const Spacer(),
-          HugeIcon(
-            icon: HugeIcons.strokeRoundedRocket01,
-            size: 16,
-            color: colorScheme.onSurface.withValues(alpha: 0.3),
-          ),
+          Expanded(child: AppVersionSection()),
+          SizedBox(width: 8),
+          DrawerAppInfo(),
         ],
       ),
     );

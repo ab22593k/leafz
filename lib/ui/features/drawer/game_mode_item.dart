@@ -16,10 +16,7 @@ class GameModeItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final wc = ScreenTypeHelper(
-      MediaQuery.sizeOf(context).width,
-      0,
-    ).windowClass;
+    final wc = context.windowClass;
     final colorScheme = Theme.of(context).colorScheme;
     final puzzleState = ref.watch(puzzleProvider);
     final isSelected = puzzleState.gameMode == mode;

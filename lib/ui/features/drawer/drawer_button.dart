@@ -42,14 +42,7 @@ class _DrawerButtonState extends State<DrawerButton>
   /// drawer is hidden, the same content levitates into a floating pane —
   /// same destination, different presentation per breakpoint.
   void _openSettings(BuildContext context) {
-    final wc = ScreenTypeHelper(
-      MediaQuery.sizeOf(context).width,
-      0,
-    ).windowClass;
-    final isExpandedPlus =
-        wc == WindowClass.expanded ||
-        wc == WindowClass.large ||
-        wc == WindowClass.extraLarge;
+    final isExpandedPlus = context.isExpandedPlus;
 
     if (isExpandedPlus) {
       showDialog(

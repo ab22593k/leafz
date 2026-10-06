@@ -6,18 +6,12 @@ import 'package:flutter/cupertino.dart';
 class DashLayout implements LayoutDelegate {
   @override
   final ScreenTypeHelper screenTypeHelper;
-  final double screenWidth;
-  final double screenHeight;
   final double containerWidth;
 
-  DashLayout({
-    required this.screenTypeHelper,
-    required this.screenWidth,
-    required this.screenHeight,
-    required this.containerWidth,
-  });
+  DashLayout({required this.screenTypeHelper, required this.containerWidth});
 
   Size get size {
+    final screenHeight = screenTypeHelper.screenHeight;
     final puzzleWidth = containerWidth;
     final dashHeight = switch ((
       screenTypeHelper.isWideLayout,

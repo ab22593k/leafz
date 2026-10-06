@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+
 enum WindowClass { compact, medium, expanded, large, extraLarge }
 
 class ScreenTypeHelper {
@@ -44,4 +46,29 @@ class ScreenTypeHelper {
     WindowClass.expanded || WindowClass.large || WindowClass.extraLarge => true,
     _ => false,
   };
+
+  /// True on expanded and larger breakpoints where co-planar panes,
+  /// leading/trailing rails, and extended navigation replace the
+  /// compact bottom bar.
+  bool get isExpandedPlus => switch (windowClass) {
+    WindowClass.expanded || WindowClass.large || WindowClass.extraLarge => true,
+    _ => false,
+  };
+}
+
+/// Single source of truth for breakpoint lookups from a [BuildContext].
+///
+/// Replaces the copy-pasted
+/// `ScreenTypeHelper(MediaQuery.sizeOf(context).width, 0).windowClass`
+/// pattern (which discarded height and therefore broke [ScreenTypeHelper.isWideLayout]).
+/// Uses the full app-window size so [ScreenTypeHelper.isWideLayout] works.
+extension WindowClassContext on BuildContext {
+  ScreenTypeHelper get screenTypeHelper {
+    final size = MediaQuery.sizeOf(this);
+    return ScreenTypeHelper(size.width, size.height);
+  }
+
+  WindowClass get windowClass => screenTypeHelper.windowClass;
+
+  bool get isExpandedPlus => screenTypeHelper.isExpandedPlus;
 }

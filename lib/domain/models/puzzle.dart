@@ -2,6 +2,7 @@ import 'package:leafz/domain/models/location.dart';
 import 'package:leafz/domain/models/tile.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
+import 'dart:math' show Random;
 
 /// Model for a Puzzle
 class Puzzle extends Equatable {
@@ -107,6 +108,31 @@ class Puzzle extends Equatable {
         tileIsWhiteSpace: i == correctLocations.length - 1,
       ),
     );
+  }
+
+  /// Generates a shuffled, solvable board for size [n] with zero tiles
+  /// in their correct positions (so the puzzle never starts solved).
+  ///
+  /// Single source of truth for board generation — replaces the duplicated
+  /// shuffle-until-solvable loops formerly in `PuzzleNotifier`.
+  static List<Tile> generateSolvableTiles(int n, Random random) {
+    final correctLocations = generateTileCorrectLocations(n);
+    var currentLocations = List<Location>.from(correctLocations)
+      ..shuffle(random);
+    var tiles = getTilesFromLocations(
+      correctLocations: correctLocations,
+      currentLocations: currentLocations,
+    );
+    var puzzle = Puzzle(n: n, tiles: tiles, movesCount: 0);
+    while (!puzzle.isSolvable() || puzzle.getNumberOfCorrectTiles() != 0) {
+      currentLocations = List<Location>.from(correctLocations)..shuffle(random);
+      tiles = getTilesFromLocations(
+        correctLocations: correctLocations,
+        currentLocations: currentLocations,
+      );
+      puzzle = Puzzle(n: n, tiles: tiles, movesCount: 0);
+    }
+    return tiles;
   }
 
   /// Gives the number of inversions in a puzzle given its tile arrangement.

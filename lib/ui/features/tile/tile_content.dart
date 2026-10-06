@@ -1,7 +1,6 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:leafz/domain/models/tile.dart';
 import 'package:leafz/ui/core/animations/animations_manager.dart';
+import 'package:leafz/ui/core/layout/glass.dart';
 import 'package:leafz/ui/core/layout/puzzle_layout.dart';
 import 'package:leafz/ui/core/layout/screen_type_helper.dart';
 import 'package:leafz/ui/core/app_text_styles.dart';
@@ -12,6 +11,7 @@ class TileContent extends StatefulWidget {
   final bool isPuzzleSolved;
   final int puzzleSize;
   final bool isBlindContentHidden;
+  final WindowClass windowClass;
 
   const TileContent({
     super.key,
@@ -19,6 +19,7 @@ class TileContent extends StatefulWidget {
     required this.isPuzzleSolved,
     required this.puzzleSize,
     this.isBlindContentHidden = false,
+    this.windowClass = WindowClass.expanded,
   });
 
   @override
@@ -56,8 +57,8 @@ class _TileContentState extends State<TileContent>
       // translucent surface lets the aurora shader glow through every tile.
       ClipRect(
         child: BackdropFilter(
-          // Same 20px glass blur as the board, per DESIGN.md.
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          // Shared glass token — same 20px blur as the board, per DESIGN.md.
+          filter: AppGlass.filter,
           child: Padding(
             padding: const EdgeInsets.all(1.5),
             child: Container(
@@ -100,8 +101,7 @@ class _TileContentState extends State<TileContent>
   }
 
   Widget _buildTileLabel(ColorScheme colorScheme) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final wc = ScreenTypeHelper(screenWidth, 0).windowClass;
+    final wc = widget.windowClass;
 
     if (widget.isBlindContentHidden) {
       return Icon(

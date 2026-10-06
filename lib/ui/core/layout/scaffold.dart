@@ -171,13 +171,17 @@ class _LeafzScaffoldState extends State<LeafzScaffold> {
   }
 
   PaneLayout _resolvePaneLayout(WindowClass wc, bool showTertiary) {
-    if (showTertiary) return PaneLayout.threePane;
-    final isExpandedPlus =
-        wc == WindowClass.expanded ||
-        wc == WindowClass.large ||
-        wc == WindowClass.extraLarge;
-    if (isExpandedPlus) return PaneLayout.fixedAndFlexible;
-    return PaneLayout.split;
+    final paneCount = 1 + (showTertiary ? 2 : 1);
+    return recommendedPaneLayout(
+      paneCount: paneCount,
+      isExtraLarge: wc == WindowClass.extraLarge,
+      isExpandedOrLarger: switch (wc) {
+        WindowClass.expanded ||
+        WindowClass.large ||
+        WindowClass.extraLarge => true,
+        _ => false,
+      },
+    );
   }
 
   // "A split-pane layout keeps the spacer visually centered.
@@ -405,10 +409,7 @@ class AdaptiveNavigationRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wc = ScreenTypeHelper(
-      MediaQuery.sizeOf(context).width,
-      0,
-    ).windowClass;
+    final wc = context.windowClass;
     final extended = switch (wc) {
       WindowClass.compact || WindowClass.medium => false,
       WindowClass.expanded ||

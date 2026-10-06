@@ -15,7 +15,6 @@ import 'package:leafz/ui/features/puzzle/view_models/speedrun_game_mode_strategy
 import 'package:leafz/ui/features/puzzle/view_models/blind_game_mode_strategy.dart';
 import 'package:leafz/ui/features/puzzle/view_models/marathon_game_mode_strategy.dart';
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' show Random;
 
@@ -181,7 +180,9 @@ class PuzzleNotifier extends Notifier<PuzzleState>
       } catch (_) {}
     });
 
-    final initialMode = switch (_storageService.get(StorageKey.gameMode)) {
+    final initialMode = switch (_storageService.get<String>(
+      StorageKey.gameMode,
+    )) {
       String name => GameMode.values.byName(name),
       _ => GameMode.classic,
     };
@@ -204,23 +205,7 @@ class PuzzleNotifier extends Notifier<PuzzleState>
   }
 
   PuzzleState _initializePuzzle(GameMode initialMode, List<Score> savedScores) {
-    final correctLocations = Puzzle.generateTileCorrectLocations(4);
-    var currentLocations = List<Location>.from(correctLocations)
-      ..shuffle(_random);
-    var tiles = Puzzle.getTilesFromLocations(
-      correctLocations: correctLocations,
-      currentLocations: currentLocations,
-    );
-    var puzzle = Puzzle(n: 4, tiles: tiles, movesCount: 0);
-    while (!puzzle.isSolvable() || puzzle.getNumberOfCorrectTiles() != 0) {
-      currentLocations = List<Location>.from(correctLocations)
-        ..shuffle(_random);
-      tiles = Puzzle.getTilesFromLocations(
-        correctLocations: correctLocations,
-        currentLocations: currentLocations,
-      );
-      puzzle = Puzzle(n: 4, tiles: tiles, movesCount: 0);
-    }
+    final tiles = Puzzle.generateSolvableTiles(4, _random);
 
     updatePuzzleInStorage();
     _strategies[initialMode]!.onPuzzleGenerated(this);
@@ -243,7 +228,7 @@ class PuzzleNotifier extends Notifier<PuzzleState>
     final storage = _storageService;
     final seconds = switch (state.stopWatchSecondsOverride) {
       > 0 => state.stopWatchSecondsOverride,
-      _ => storage.get(StorageKey.secondsElapsed) ?? 0,
+      _ => storage.get<int>(StorageKey.secondsElapsed) ?? 0,
     };
     final newScore = Score(
       movesCount: state.movesCount,
@@ -276,7 +261,7 @@ class PuzzleNotifier extends Notifier<PuzzleState>
 
   List<Score> _getScoresFromStorage() {
     try {
-      final data = _storageService.get(StorageKey.scores);
+      final data = _storageService.get<List>(StorageKey.scores);
       if (data != null) return Score.fromJsonList(data);
     } catch (e) {
       log('Error retrieving scores from storage');
@@ -297,8 +282,9 @@ class PuzzleNotifier extends Notifier<PuzzleState>
 
   Puzzle? _getPuzzleFromStorage() {
     try {
-      final data = _storageService.get(StorageKey.puzzle);
-      return Puzzle.fromJson(json.decode(json.encode(data)));
+      final data = _storageService.get<Map>(StorageKey.puzzle);
+      if (data == null) return null;
+      return Puzzle.fromJson(Map<String, dynamic>.from(data));
     } catch (e) {
       log('Error in local storage, clearing data...');
       _storageService.clear();
@@ -309,35 +295,55 @@ class PuzzleNotifier extends Notifier<PuzzleState>
   // ── Core puzzle logic ──
 
   void swapTilesAndUpdatePuzzle(Tile tile) {
+    final swapped = _swappedTiles(tile);
+    if (swapped == null) return;
+
+    final isSolved = Puzzle(
+      n: state.n,
+      tiles: swapped,
+      movesCount: state.movesCount + 1,
+    ).isSolved;
+    // Values are unique, so the moved tile is identified by value —
+    // locations have already been swapped at this point.
+    final movedTile = swapped.firstWhere((t) => t.value == tile.value);
+    _announceMove(movedTile: movedTile, isSolved: isSolved, tiles: swapped);
+
+    _emit(state.copyWith(tiles: swapped, movesCount: state.movesCount + 1));
+    _strategies[state.gameMode]!.onTileMoved(this);
+    updatePuzzleInStorage();
+  }
+
+  /// Returns a copy of [state.tiles] with [tile] and the whitespace
+  /// swapped, or `null` when either tile cannot be located.
+  List<Tile>? _swappedTiles(Tile tile) {
     final tiles = List<Tile>.of(state.tiles);
     final movedIdx = tiles.indexWhere(
       (ct) => ct.currentLocation == tile.currentLocation,
     );
     final wsIdx = tiles.indexWhere((t) => t.tileIsWhiteSpace);
-    if (movedIdx == -1 || wsIdx == -1) return;
+    if (movedIdx == -1 || wsIdx == -1) return null;
 
     final moved = tiles[movedIdx];
     final ws = tiles[wsIdx];
     tiles[movedIdx] = moved.copyWith(currentLocation: ws.currentLocation);
     tiles[wsIdx] = ws.copyWith(currentLocation: moved.currentLocation);
+    return tiles;
+  }
 
-    final isSolved = Puzzle(
-      n: state.n,
-      tiles: tiles,
-      movesCount: state.movesCount + 1,
-    ).isSolved;
-    if (tiles[movedIdx].isAtCorrectLocation) {
-      if (isSolved) {
-        HapticFeedback.vibrate();
-        _handlePuzzleSolved(tiles);
-      } else {
-        HapticFeedback.mediumImpact();
-      }
+  /// Haptic feedback for a move: vibrate on solve, medium impact when the
+  /// moved tile lands correctly, silent otherwise.
+  void _announceMove({
+    required Tile movedTile,
+    required bool isSolved,
+    required List<Tile> tiles,
+  }) {
+    if (!movedTile.isAtCorrectLocation) return;
+    if (isSolved) {
+      HapticFeedback.vibrate();
+      _handlePuzzleSolved(tiles);
+    } else {
+      HapticFeedback.mediumImpact();
     }
-
-    _emit(state.copyWith(tiles: tiles, movesCount: state.movesCount + 1));
-    _strategies[state.gameMode]!.onTileMoved(this);
-    updatePuzzleInStorage();
   }
 
   @override
@@ -366,23 +372,7 @@ class PuzzleNotifier extends Notifier<PuzzleState>
   }
 
   void _generateNew() {
-    final correctLocations = Puzzle.generateTileCorrectLocations(state.n);
-    var currentLocations = List<Location>.from(correctLocations);
-    var tiles = Puzzle.getTilesFromLocations(
-      correctLocations: correctLocations,
-      currentLocations: currentLocations,
-    );
-    var puzzle = Puzzle(n: state.n, tiles: tiles, movesCount: 0);
-
-    while (!puzzle.isSolvable() || puzzle.getNumberOfCorrectTiles() != 0) {
-      currentLocations = List<Location>.from(correctLocations)
-        ..shuffle(_random);
-      tiles = Puzzle.getTilesFromLocations(
-        correctLocations: correctLocations,
-        currentLocations: currentLocations,
-      );
-      puzzle = Puzzle(n: state.n, tiles: tiles, movesCount: 0);
-    }
+    final tiles = Puzzle.generateSolvableTiles(state.n, _random);
 
     _emit(
       state.copyWith(tiles: tiles, movesCount: 0, stopWatchSecondsOverride: 0),

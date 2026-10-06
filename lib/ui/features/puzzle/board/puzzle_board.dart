@@ -1,10 +1,9 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leafz/domain/models/game_mode.dart';
 import 'package:leafz/ui/core/animations/animations_manager.dart';
 import 'package:leafz/ui/core/animations/pulse_transition.dart';
 import 'package:leafz/ui/core/animations/scale_up_transition.dart';
+import 'package:leafz/ui/core/layout/glass.dart';
 import 'package:leafz/ui/core/layout/screen_type_helper.dart';
 import 'package:leafz/ui/features/tile/tile_animated_positioned.dart';
 import 'package:leafz/ui/features/tile/tile_content.dart';
@@ -71,14 +70,7 @@ class _PuzzleBoardState extends ConsumerState<PuzzleBoard> {
         return;
       }
       if (physicalKey == PhysicalKeyboardKey.keyD) {
-        final scaffold = Scaffold.maybeOf(context);
-        if (scaffold != null) {
-          if (scaffold.isDrawerOpen) {
-            Navigator.of(context).pop();
-          } else {
-            scaffold.openDrawer();
-          }
-        }
+        _toggleDrawer();
         return;
       }
     }
@@ -87,6 +79,19 @@ class _PuzzleBoardState extends ConsumerState<PuzzleBoard> {
         when puzzleState.movesCount == 1 &&
             keyboardListenerFocusNode.hasFocus) {
       ref.read(stopWatchProvider.notifier).start();
+    }
+  }
+
+  /// Toggles the surrounding [Scaffold] drawer when the board is hosted
+  /// inside one (the `D` shortcut). No-op elsewhere so the board stays
+  /// reusable outside a scaffold.
+  void _toggleDrawer() {
+    final scaffold = Scaffold.maybeOf(context);
+    if (scaffold == null) return;
+    if (scaffold.isDrawerOpen) {
+      Navigator.of(context).pop();
+    } else {
+      scaffold.openDrawer();
     }
   }
 
@@ -115,7 +120,7 @@ class _PuzzleBoardState extends ConsumerState<PuzzleBoard> {
               // Per DESIGN.md: glass surfaces blur at 20px, and any required
               // boundary uses the "ghost border" fallback — outline-variant
               // at 15% opacity, never a solid line.
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              filter: AppGlass.filter,
               child: Container(
                 key: const ValueKey('puzzle_board'),
                 width: widget.containerWidth,
@@ -154,6 +159,7 @@ class _PuzzleBoardState extends ConsumerState<PuzzleBoard> {
                               isPuzzleSolved: isSolved,
                               puzzleSize: puzzleState.n,
                               isBlindContentHidden: isBlindContentHidden,
+                              windowClass: widget.windowClass,
                             ),
                           ),
                         ),

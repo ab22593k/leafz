@@ -24,10 +24,7 @@ class PuzzleHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final wc = ScreenTypeHelper(
-      MediaQuery.sizeOf(context).width,
-      0,
-    ).windowClass;
+    final wc = context.windowClass;
     final colorScheme = Theme.of(context).colorScheme;
     final puzzleState = ref.watch(puzzleProvider);
     final l10n = context.l10n;
@@ -160,14 +157,14 @@ class PuzzleHeader extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
       decoration: BoxDecoration(
+        // Selection is expressed through fill strength alone — no border,
+        // per DESIGN.md's no-line rule. The current stage reads as a
+        // stronger primary fill than the done stages' tertiary wash.
         color: isCurrent
-            ? cs.primary.withValues(alpha: 0.15)
+            ? cs.primary.withValues(alpha: 0.22)
             : isDone
             ? cs.tertiary.withValues(alpha: 0.15)
             : Colors.transparent,
-        border: isCurrent
-            ? Border.all(color: cs.primary.withValues(alpha: 0.3))
-            : null,
       ),
       child: Text(
         '$size\u00d7$size',

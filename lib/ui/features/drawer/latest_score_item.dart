@@ -23,10 +23,7 @@ class LatestScoreItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wc = ScreenTypeHelper(
-      MediaQuery.sizeOf(context).width,
-      0,
-    ).windowClass;
+    final wc = context.windowClass;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(

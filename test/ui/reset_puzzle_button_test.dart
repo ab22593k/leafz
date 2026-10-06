@@ -32,7 +32,10 @@ Widget Function() buildTest({required double screenWidth}) {
   return () {
     final storage = _MockStorageService();
     when(() => storage.has(any())).thenReturn(false);
-    when(() => storage.get(any())).thenReturn(null);
+    when(() => storage.get<String>(any())).thenReturn(null);
+    when(() => storage.get<int>(any())).thenReturn(null);
+    when(() => storage.get<List>(any())).thenReturn(null);
+    when(() => storage.get<Map>(any())).thenReturn(null);
     when(() => storage.set(any(), any())).thenAnswer((_) async {});
     when(() => storage.remove(any())).thenAnswer((_) async {});
     when(() => storage.clear()).thenAnswer((_) async {});

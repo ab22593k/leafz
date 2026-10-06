@@ -3,16 +3,11 @@ import 'package:leafz/ui/core/layout/spacing.dart';
 
 class PuzzleLayout {
   final ScreenTypeHelper screenTypeHelper;
-  final double screenWidth;
-  final double screenHeight;
 
-  PuzzleLayout({
-    required this.screenTypeHelper,
-    required this.screenWidth,
-    required this.screenHeight,
-  });
+  PuzzleLayout({required this.screenTypeHelper});
 
   double get containerWidth {
+    final screenWidth = screenTypeHelper.screenWidth;
     final margin = Spacing.puzzleMargin(screenTypeHelper.windowClass) * 2;
     final maxWidth = screenWidth - margin;
     final isVeryWide = screenWidth > 1400;
