@@ -7,16 +7,22 @@ import 'package:leafz/helpers/localizations_ext.dart';
 import 'package:leafz/ui/core/animations/animations_manager.dart';
 import 'package:leafz/ui/core/animations/fade_in_transition.dart';
 import 'package:leafz/ui/core/layout/screen_type_helper.dart';
+import 'package:leafz/ui/core/layout/spacing.dart';
 import 'package:leafz/ui/features/puzzle/ui/correct_tiles_count.dart';
 import 'package:leafz/ui/features/puzzle/ui/moves_count.dart';
 import 'package:leafz/ui/features/puzzle/ui/puzzle_stop_watch.dart';
 import 'package:leafz/ui/features/puzzle/view_models/puzzle_notifier.dart';
 import 'package:leafz/ui/core/app_text_styles.dart';
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
 
-enum HeaderDisplay { bottomBar, topRail, sidePane }
+enum HeaderDisplay { bottomBar, sidePane }
 
+/// The puzzle's stat readout, in two editorial registers:
+///
+/// * [HeaderDisplay.bottomBar] — compact/medium. Label above value, no
+///   icons, values in serif tabular figures.
+/// * [HeaderDisplay.sidePane] — expanded+. The same three stats as a
+///   stacked, left-aligned colophon with generous leading.
 class PuzzleHeader extends ConsumerWidget {
   final HeaderDisplay displayMode;
 
@@ -48,11 +54,15 @@ class PuzzleHeader extends ConsumerWidget {
           HeaderDisplay.bottomBar,
           WindowClass.compact || WindowClass.medium,
         ) =>
-          _compactLayout(colorScheme),
+          _compactLayout(colorScheme, l10n),
         _ => const SizedBox.shrink(),
       },
     );
   }
+
+  // ---------------------------------------------------------------------
+  // Marathon
+  // ---------------------------------------------------------------------
 
   Widget _marathonHeader(
     ColorScheme colorScheme,
@@ -65,18 +75,22 @@ class PuzzleHeader extends ConsumerWidget {
     final currentIdx = sizes.indexOf(currentSize);
     final endIdx = sizes.indexOf(endSize);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    // Wrap, not Row: at 320dp a marathon run plus its route can exceed the
+    // bar's width, and a Row would paint the overflow stripes instead of
+    // continuing on a second line.
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: Spacing.xxs,
+      runSpacing: 2,
       children: [
         _marathonLabel(colorScheme, l10n),
-        const SizedBox(width: 4),
         Text(
           '\u2022',
           style: AppTextStyles.labelSmall.copyWith(
             color: colorScheme.onSurface.withValues(alpha: 0.3),
           ),
         ),
-        const SizedBox(width: 4),
         ..._marathonChips(colorScheme, endIdx, currentIdx, sizes),
       ],
     );
@@ -93,34 +107,26 @@ class PuzzleHeader extends ConsumerWidget {
     final currentIdx = sizes.indexOf(currentSize);
     final endIdx = sizes.indexOf(endSize);
 
-    return Wrap(
-      spacing: 4,
-      runSpacing: 6,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _marathonLabel(colorScheme, l10n),
-        ..._marathonChips(colorScheme, endIdx, currentIdx, sizes),
+        const SizedBox(height: Spacing.sm),
+        Wrap(
+          spacing: Spacing.xxs,
+          runSpacing: Spacing.xxs,
+          children: _marathonChips(colorScheme, endIdx, currentIdx, sizes),
+        ),
       ],
     );
   }
 
   Widget _marathonLabel(ColorScheme colorScheme, AppLocalizations l10n) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        HugeIcon(
-          icon: HugeIcons.strokeRoundedLink01,
-          size: 16,
-          color: colorScheme.onSurface.withValues(alpha: 0.6),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          GameModeHelper.localizedName(GameMode.marathon, l10n),
-          style: AppTextStyles.labelSmall.copyWith(
-            color: colorScheme.onSurface.withValues(alpha: 0.6),
-            fontVariations: const [FontVariation('wght', 600)],
-          ),
-        ),
-      ],
+    return Text(
+      GameModeHelper.localizedName(GameMode.marathon, l10n).toUpperCase(),
+      style: AppTextStyles.kicker.copyWith(
+        color: colorScheme.onSurface.withValues(alpha: 0.55),
+      ),
     );
   }
 
@@ -139,7 +145,7 @@ class PuzzleHeader extends ConsumerWidget {
         children: [
           if (i > 0)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 1),
               child: Text(
                 '\u2192',
                 style: AppTextStyles.labelSmall.copyWith(
@@ -155,11 +161,11 @@ class PuzzleHeader extends ConsumerWidget {
 
   Widget _marathonChip(int size, bool isDone, bool isCurrent, ColorScheme cs) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         // Selection is expressed through fill strength alone — no border,
-        // per DESIGN.md's no-line rule. The current stage reads as a
-        // stronger primary fill than the done stages' tertiary wash.
+        // per the no-line rule. The current stage reads as a stronger
+        // primary fill than the done stages' tertiary wash.
         color: isCurrent
             ? cs.primary.withValues(alpha: 0.22)
             : isDone
@@ -169,140 +175,138 @@ class PuzzleHeader extends ConsumerWidget {
       child: Text(
         '$size\u00d7$size',
         style: AppTextStyles.labelSmall.copyWith(
+          letterSpacing: 0.4,
           color: isDone
               ? cs.tertiary
               : isCurrent
               ? cs.primary
               : cs.onSurface.withValues(alpha: 0.3),
-          fontVariations: const [FontVariation('wght', 700)],
         ),
       ),
     );
   }
 
-  Widget _compactLayout(ColorScheme colorScheme) {
-    // All three stats render as peers: one shared value style and one icon
-    // size, so the timer no longer towers over moves/correct. The value
-    // style keeps color semantics (progress tint on correct tiles, error
-    // on a critical countdown) intact.
-    final statStyle = AppTextStyles.labelLarge.copyWith(
+  // ---------------------------------------------------------------------
+  // Stats
+  // ---------------------------------------------------------------------
+
+  Widget _compactLayout(ColorScheme colorScheme, AppLocalizations l10n) {
+    final valueStyle = AppTextStyles.statValueSmall.copyWith(
       color: colorScheme.onSurface,
-      fontVariations: const [FontVariation('wght', 700)],
     );
+
+    // Three peers, label above value. No icons: the label already names the
+    // stat, and the serif numeral is the thing worth looking at. Each column
+    // is [Expanded] so a long translation ellipsizes instead of overflowing a
+    // 320dp window.
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        PuzzleStopWatch(textStyle: statStyle, iconSize: 14),
-        _statChip(
-          HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowUpDown,
-            size: 14,
-            color: colorScheme.onSurface.withValues(alpha: 0.6),
+        Expanded(
+          child: _statColumn(
+            label: l10n.time,
+            colorScheme: colorScheme,
+            value: PuzzleStopWatch(showIcon: false, textStyle: valueStyle),
           ),
-          MovesCount(textStyle: statStyle),
-          colorScheme,
         ),
-        CorrectTilesCount(colorScheme: colorScheme, textStyle: statStyle),
+        Expanded(
+          child: _statColumn(
+            label: l10n.moves,
+            colorScheme: colorScheme,
+            value: MovesCount(showLabel: false, textStyle: valueStyle),
+          ),
+        ),
+        Expanded(
+          child: _statColumn(
+            label: l10n.correct,
+            colorScheme: colorScheme,
+            value: CorrectTilesCount(
+              colorScheme: colorScheme,
+              showIcon: false,
+              textStyle: valueStyle,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _statColumn({
+    required String label,
+    required ColorScheme colorScheme,
+    required Widget value,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          label.toUpperCase(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.labelSmall.copyWith(
+            color: colorScheme.onSurface.withValues(alpha: 0.45),
+          ),
+        ),
+        const SizedBox(height: 3),
+        value,
       ],
     );
   }
 
   Widget _sidePaneLayout(ColorScheme colorScheme, AppLocalizations l10n) {
-    // The pane's labeled rows already claim a shared value style via
-    // DefaultTextStyle, but the stat widgets set explicit styles internally
-    // — so pass it down explicitly to make the 18px treatment actually
-    // render for all three stats.
-    final statStyle = AppTextStyles.titleMedium.copyWith(
+    final valueStyle = AppTextStyles.statValue.copyWith(
       color: colorScheme.onSurface,
-      fontVariations: const [FontVariation('wght', 700)],
     );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _labeledStatRow(
-          icon: const HugeIcon(icon: HugeIcons.strokeRoundedClock01, size: 16),
           label: l10n.time,
-          child: PuzzleStopWatch(showIcon: false, textStyle: statStyle),
           colorScheme: colorScheme,
+          child: PuzzleStopWatch(showIcon: false, textStyle: valueStyle),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: Spacing.lg),
         _labeledStatRow(
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowUpDown,
-            size: 16,
-            color: colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
           label: l10n.moves,
-          child: MovesCount(textStyle: statStyle),
           colorScheme: colorScheme,
+          child: MovesCount(showLabel: false, textStyle: valueStyle),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: Spacing.lg),
         _labeledStatRow(
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-            size: 16,
-            color: colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
           label: l10n.correct,
+          colorScheme: colorScheme,
           child: CorrectTilesCount(
             colorScheme: colorScheme,
             showIcon: false,
-            textStyle: statStyle,
+            textStyle: valueStyle,
           ),
-          colorScheme: colorScheme,
         ),
       ],
     );
   }
 
+  /// Rubric over numeral — the sidebar's typographic unit.
   Widget _labeledStatRow({
-    required Widget icon,
     required String label,
-    required Widget child,
     required ColorScheme colorScheme,
+    required Widget child,
   }) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        icon,
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: AppTextStyles.labelSmall.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.5),
-                  fontVariations: const [FontVariation('wght', 600)],
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 1),
-              DefaultTextStyle(
-                style: AppTextStyles.titleMedium.copyWith(
-                  color: colorScheme.onSurface,
-                  fontVariations: const [FontVariation('wght', 700)],
-                ),
-                child: child,
-              ),
-            ],
+        Text(
+          label.toUpperCase(),
+          style: AppTextStyles.kicker.copyWith(
+            color: colorScheme.onSurface.withValues(alpha: 0.45),
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _statChip(Widget iconWidget, Widget text, ColorScheme colorScheme) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        iconWidget,
-        const SizedBox(width: 4),
+        const SizedBox(height: Spacing.xs),
         DefaultTextStyle(
-          style: AppTextStyles.labelSmall.copyWith(
-            color: colorScheme.onSurface,
-          ),
-          child: text,
+          style: AppTextStyles.statValue.copyWith(color: colorScheme.onSurface),
+          child: child,
         ),
       ],
     );

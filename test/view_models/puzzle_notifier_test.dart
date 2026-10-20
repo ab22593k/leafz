@@ -14,15 +14,7 @@ import 'package:leafz/domain/models/tile.dart';
 import 'package:leafz/data/services/storage_service.dart';
 import 'package:leafz/ui/features/puzzle/view_models/puzzle_notifier.dart';
 
-// ---------------------------------------------------------------------------
-// Mocks
-// ---------------------------------------------------------------------------
-
 class MockStorageService extends Mock implements StorageService {}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 /// Creates a [ProviderContainer] with the given storage override, processes
 /// any pending microtasks (for Riverpod async init), and returns both the
@@ -82,10 +74,6 @@ List<Tile> shuffledTiles3x3() {
   return _tilesFromLocations(3, cur);
 }
 
-// ---------------------------------------------------------------------------
-// Puzzles
-// ---------------------------------------------------------------------------
-
 Puzzle storedPuzzle3x3({int movesCount = 7}) {
   final c = _correctLocations(3);
   return Puzzle(
@@ -94,10 +82,6 @@ Puzzle storedPuzzle3x3({int movesCount = 7}) {
     movesCount: movesCount,
   );
 }
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

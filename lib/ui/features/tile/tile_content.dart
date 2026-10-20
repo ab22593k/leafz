@@ -2,7 +2,6 @@ import 'package:leafz/domain/models/tile.dart';
 import 'package:leafz/ui/core/animations/animations_manager.dart';
 import 'package:leafz/ui/core/layout/glass.dart';
 import 'package:leafz/ui/core/layout/puzzle_layout.dart';
-import 'package:leafz/ui/core/layout/screen_type_helper.dart';
 import 'package:leafz/ui/core/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +10,11 @@ class TileContent extends StatefulWidget {
   final bool isPuzzleSolved;
   final int puzzleSize;
   final bool isBlindContentHidden;
-  final WindowClass windowClass;
+
+  /// Side of the cell the numeral sits in. Type is derived from this rather
+  /// than from the window class: the board's size depends on height as well
+  /// as width, so the window no longer predicts how much room a tile has.
+  final double tileSide;
 
   const TileContent({
     super.key,
@@ -19,7 +22,7 @@ class TileContent extends StatefulWidget {
     required this.isPuzzleSolved,
     required this.puzzleSize,
     this.isBlindContentHidden = false,
-    this.windowClass = WindowClass.expanded,
+    this.tileSide = 100,
   });
 
   @override
@@ -101,21 +104,20 @@ class _TileContentState extends State<TileContent>
   }
 
   Widget _buildTileLabel(ColorScheme colorScheme) {
-    final wc = widget.windowClass;
+    final textSize = PuzzleLayout.tileTextSize(widget.tileSide);
 
     if (widget.isBlindContentHidden) {
       return Icon(
         Icons.help_outline,
-        size: (PuzzleLayout.tileTextSize(wc, widget.puzzleSize) ?? 24) * 0.6,
+        size: textSize * 0.6,
         color: colorScheme.onSurface.withValues(alpha: 0.25),
       );
     }
 
     return Text(
       '${widget.tile.value}',
-      style: AppTextStyles.tileAdaptive(wc).copyWith(
-        fontSize: PuzzleLayout.tileTextSize(wc, widget.puzzleSize),
-        fontWeight: FontWeight.w900,
+      style: AppTextStyles.tile.copyWith(
+        fontSize: textSize,
         color: colorScheme.onSurface,
       ),
     );

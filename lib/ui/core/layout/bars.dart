@@ -41,13 +41,19 @@ class PuzzleAppBar extends StatelessWidget implements PreferredSizeWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final wc = context.windowClass;
     final isWide = wc != WindowClass.compact;
+    final insets = MediaQuery.paddingOf(context);
 
+    // Scaffold permits this bar `preferredSize.height + topInset` and places
+    // it at y=0, so the bar itself must claim that full height and pad its
+    // content past the status bar. Adding the inset to a fixed 64dp box (the
+    // previous behaviour) only worked because an app-wide SafeArea had
+    // already reduced the inset to zero.
     return Container(
-      height: preferredSize.height,
+      height: preferredSize.height + insets.top,
       padding: EdgeInsets.only(
-        left: 4,
-        right: 4,
-        top: MediaQuery.paddingOf(context).top,
+        left: 4 + insets.left,
+        right: 4 + insets.right,
+        top: insets.top,
       ),
       child: Row(
         children: [
@@ -78,12 +84,12 @@ class _AppBarTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The app bar carries the wordmark, not a page title: tracked serif
+    // caps sitting at the top of the layout like a masthead. Uppercasing
+    // here keeps the call site free of presentation detail.
     return Text(
-      title,
-      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-        fontFamily: AppTextStyles.primaryFontFamily,
-        color: color,
-      ),
+      title.toUpperCase(),
+      style: AppTextStyles.wordmark.copyWith(color: color),
       overflow: TextOverflow.ellipsis,
     );
   }
@@ -170,8 +176,8 @@ class PuzzleToolbar extends StatelessWidget {
         filter: AppGlass.filter,
         child: Container(
           padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
+            left: 16 + padding.left,
+            right: 16 + padding.right,
             top: 8,
             bottom: 8 + padding.bottom,
           ),

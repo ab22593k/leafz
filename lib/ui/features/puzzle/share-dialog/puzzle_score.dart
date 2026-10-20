@@ -4,8 +4,12 @@ import 'package:leafz/helpers/share_score_helper.dart';
 import 'package:leafz/ui/core/layout/spacing.dart';
 import 'package:leafz/ui/core/app_text_styles.dart';
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
 
+/// The solved-state cover.
+///
+/// Structured like the closing page of a magazine feature: rubric, serif
+/// headline, deck, then a two-column score rule. The only live numbers are
+/// the player's own — grid, time, moves.
 class PuzzleScore extends StatelessWidget {
   final Duration duration;
   final int movesCount;
@@ -27,22 +31,29 @@ class PuzzleScore extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(context.l10n.congratsTitle, style: AppTextStyles.displaySmall),
-            const SizedBox(height: Spacing.xs),
-            Text(
-              context.l10n.congratsSubtitle,
-              style: TextStyle(
-                color: colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-            const SizedBox(height: Spacing.sm),
-            _statsRow(context, colorScheme),
-            const SizedBox(height: Spacing.md),
-          ],
+        Text(
+          '$puzzleSize \u00d7 $puzzleSize',
+          style: AppTextStyles.kicker.copyWith(
+            color: colorScheme.onSurface.withValues(alpha: 0.45),
+          ),
         ),
+        const SizedBox(height: Spacing.xs),
+        Text(
+          context.l10n.congratsTitle,
+          style: AppTextStyles.displaySmall.copyWith(
+            color: colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: Spacing.xs),
+        Text(
+          context.l10n.congratsSubtitle,
+          style: AppTextStyles.bodySmall.copyWith(
+            color: colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
+        const SizedBox(height: Spacing.lg),
+        _statsRow(context, colorScheme),
+        const SizedBox(height: Spacing.xl),
         _actionButtons(context),
       ],
     );
@@ -50,25 +61,45 @@ class PuzzleScore extends StatelessWidget {
 
   Widget _statsRow(BuildContext context, ColorScheme colorScheme) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: Row(
-            children: [
-              const HugeIcon(icon: HugeIcons.strokeRoundedClock01),
-              const SizedBox(width: 5),
-              Text(
-                DurationHelper.toFormattedTime(duration),
-                style: AppTextStyles.titleLarge,
-              ),
-            ],
+          child: _scoreStat(
+            label: context.l10n.time,
+            value: DurationHelper.toFormattedTime(duration),
+            colorScheme: colorScheme,
           ),
         ),
         Expanded(
-          child: Text(
-            context.l10n.movesCountLabel(movesCount),
-            style: AppTextStyles.titleLarge,
+          child: _scoreStat(
+            label: context.l10n.moves,
+            value: '$movesCount',
+            colorScheme: colorScheme,
           ),
+        ),
+      ],
+    );
+  }
+
+  /// Rubric over numeral, the same unit the sidebar uses.
+  Widget _scoreStat({
+    required String label,
+    required String value,
+    required ColorScheme colorScheme,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: AppTextStyles.kicker.copyWith(
+            color: colorScheme.onSurface.withValues(alpha: 0.45),
+          ),
+        ),
+        const SizedBox(height: Spacing.xs),
+        Text(
+          value,
+          style: AppTextStyles.statValue.copyWith(color: colorScheme.onSurface),
         ),
       ],
     );
@@ -78,15 +109,7 @@ class PuzzleScore extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () => Navigator.of(context).pop(),
-            label: Text(context.l10n.restart),
-            icon: const HugeIcon(icon: HugeIcons.strokeRoundedRefresh01),
-          ),
-        ),
-        const SizedBox(width: Spacing.sm),
-        Expanded(
-          child: ElevatedButton.icon(
+          child: ElevatedButton(
             onPressed: () {
               ShareScoreHelper.openLink(
                 ShareScoreHelper.getTwitterShareLink(
@@ -96,8 +119,23 @@ class PuzzleScore extends StatelessWidget {
                 ),
               );
             },
-            label: Text(context.l10n.share),
-            icon: const HugeIcon(icon: HugeIcons.strokeRoundedShare01),
+            child: Text(context.l10n.share.toUpperCase()),
+          ),
+        ),
+        const SizedBox(width: Spacing.sm),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              foregroundColor: Theme.of(context).colorScheme.onSurface,
+              elevation: 0,
+              shadowColor: Colors.transparent,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+            ),
+            child: Text(context.l10n.restart.toUpperCase()),
           ),
         ),
       ],

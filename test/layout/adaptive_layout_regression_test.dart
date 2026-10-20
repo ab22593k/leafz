@@ -3,6 +3,8 @@ import 'dart:math' show Random;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leafz/domain/models/puzzle.dart';
+import 'package:leafz/ui/core/layout/bars.dart';
+import 'package:leafz/ui/core/layout/puzzle_layout.dart';
 import 'package:leafz/ui/core/layout/screen_type_helper.dart';
 import 'package:leafz/ui/core/layout/stars_layout.dart';
 
@@ -65,6 +67,104 @@ void main() {
       // height and broke isWideLayout consumers.
       expect(seen, WindowClass.expanded);
       expect(wide, isTrue);
+    });
+  });
+
+  group('PuzzleLayout', () {
+    PuzzleLayout layoutFor(double w, double h) =>
+        PuzzleLayout(availableWidth: w, availableHeight: h);
+
+    test('board never exceeds the axis it was given', () {
+      // The regression: a 1440×600 window produced a 560dp board in 536dp of
+      // height because only the width was consulted.
+      const viewports = [
+        Size(1440, 536),
+        Size(1440, 300),
+        Size(840, 600),
+        Size(390, 702),
+        Size(320, 400),
+        Size(2560, 1376),
+      ];
+      for (final viewport in viewports) {
+        final layout = layoutFor(viewport.width, viewport.height);
+        expect(
+          layout.boardSide,
+          lessThanOrEqualTo(viewport.shortestSide),
+          reason: '${viewport.width}×${viewport.height}',
+        );
+      }
+    });
+
+    test('board is square and bounded by the shorter axis', () {
+      // Width-rich, height-poor: height must win.
+      final short = layoutFor(1200, 400);
+      expect(short.boardSide, lessThanOrEqualTo(400));
+
+      // Height-rich, width-poor: width must win.
+      final narrow = layoutFor(300, 1000);
+      expect(narrow.boardSide, lessThanOrEqualTo(300));
+    });
+
+    test('board stops growing past the cap', () {
+      final huge = layoutFor(3840, 2160);
+      expect(huge.boardSide, lessThanOrEqualTo(PuzzleLayout.maxSide));
+    });
+
+    test('degenerate constraints yield a zero board, not NaN', () {
+      expect(layoutFor(0, 0).boardSide, 0);
+      expect(layoutFor(double.infinity, double.infinity).boardSide, 0);
+      // An unbounded axis is not degenerate — the bounded one still decides.
+      expect(layoutFor(double.infinity, 400).boardSide, 368);
+    });
+
+    test('tile type scales with the tile, not the viewport', () {
+      // Small tiles get small type, large tiles get large type, and neither
+      // escapes the clamp.
+      expect(PuzzleLayout.tileTextSize(30), 13);
+      expect(PuzzleLayout.tileTextSize(100), 30);
+      expect(PuzzleLayout.tileTextSize(400), 56);
+    });
+  });
+
+  group('PuzzleAppBar insets', () {
+    testWidgets('claims the status bar inset in its own height', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(
+              size: Size(400, 800),
+              padding: EdgeInsets.only(top: 47),
+            ),
+            child: Scaffold(
+              appBar: PuzzleAppBar(title: 'Leafz'),
+              body: SizedBox(),
+            ),
+          ),
+        ),
+      );
+
+      // Scaffold allows `preferredSize.height + topInset`; the bar must use
+      // all of it, otherwise its content is squashed into 64dp including the
+      // status bar.
+      expect(tester.getSize(find.byType(PuzzleAppBar)).height, 64 + 47);
+    });
+
+    testWidgets('stays 64dp when there is no inset', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(size: Size(1024, 768)),
+            child: Scaffold(
+              appBar: PuzzleAppBar(title: 'Leafz'),
+              body: SizedBox(),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.getSize(find.byType(PuzzleAppBar)).height, 64);
     });
   });
 

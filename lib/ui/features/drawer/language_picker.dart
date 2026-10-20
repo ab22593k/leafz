@@ -2,11 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leafz/generated/app_localizations.dart';
 import 'package:leafz/helpers/localizations_ext.dart';
 import 'package:leafz/ui/core/app_text_styles.dart';
-import 'package:leafz/ui/core/layout/screen_type_helper.dart';
+import 'package:leafz/ui/core/layout/section_heading.dart';
 import 'package:leafz/ui/core/layout/spacing.dart';
 import 'package:leafz/ui/core/providers/locale_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
 
 class LanguagePicker extends ConsumerWidget {
   const LanguagePicker({super.key});
@@ -19,7 +18,6 @@ class LanguagePicker extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final wc = context.windowClass;
     final padding = MediaQuery.paddingOf(context);
     final drawerStartPadding = padding.left == 0 ? Spacing.md : padding.left;
     final localeState = ref.watch(localeProvider);
@@ -35,29 +33,12 @@ class LanguagePicker extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              HugeIcon(
-                icon: HugeIcons.strokeRoundedLanguageSquare,
-                size: 16,
-                color: colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                context.l10n.language,
-                style: AppTextStyles.titleAdaptive(wc),
-              ),
-            ],
+          SectionHeading(
+            label: context.l10n.language,
+            title: context.l10n.switchLanguage,
           ),
-          const SizedBox(height: 4),
-          Text(
-            context.l10n.switchLanguage,
-            style: AppTextStyles.bodyAdaptive(
-              wc,
-            ).copyWith(color: colorScheme.onSurface.withValues(alpha: 0.5)),
-          ),
-          const SizedBox(height: 10),
-          _languageOptions(context, ref, wc, colorScheme, localeState),
+          const SizedBox(height: Spacing.sm),
+          _languageOptions(context, ref, colorScheme, localeState),
         ],
       ),
     );
@@ -66,7 +47,6 @@ class LanguagePicker extends ConsumerWidget {
   Widget _languageOptions(
     BuildContext context,
     WidgetRef ref,
-    WindowClass wc,
     ColorScheme colorScheme,
     LocaleState localeState,
   ) {

@@ -67,17 +67,14 @@ class AppAlertDialog extends StatelessWidget {
         if (title != null)
           Text(
             title!,
-            maxLines: 2,
+            maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: AppTextStyles.primaryFontFamily,
-              fontSize: 22,
-              fontWeight: FontWeight.w400,
-              height: 1.2,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.headlineSmall.copyWith(
               color: colorScheme.onSurface,
             ),
           ),
-        const SizedBox(height: 40),
+        const SizedBox(height: Spacing.xl),
         _buildButtonRow(context, colorScheme),
       ],
     );
@@ -94,7 +91,7 @@ class AppAlertDialog extends StatelessWidget {
               }
               Navigator.of(context).pop();
             },
-            child: Text(context.l10n.yes),
+            child: Text(context.l10n.yes.toUpperCase()),
           ),
         ),
         const SizedBox(width: Spacing.sm),
@@ -114,7 +111,7 @@ class AppAlertDialog extends StatelessWidget {
                 ),
               ),
             ),
-            child: Text(context.l10n.cancel),
+            child: Text(context.l10n.cancel.toUpperCase()),
           ),
         ),
       ],

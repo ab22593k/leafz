@@ -3,8 +3,8 @@ import 'package:leafz/domain/models/game_mode.dart';
 import 'package:leafz/domain/models/puzzle.dart';
 import 'package:leafz/helpers/localizations_ext.dart';
 import 'package:leafz/ui/features/drawer/game_mode_item.dart';
+import 'package:leafz/ui/core/layout/section_heading.dart';
 import 'package:leafz/ui/core/layout/spacing.dart';
-import 'package:leafz/ui/core/layout/screen_type_helper.dart';
 import 'package:leafz/ui/core/app_text_styles.dart';
 import 'package:leafz/ui/features/puzzle/view_models/puzzle_notifier.dart';
 import 'package:flutter/material.dart';
@@ -16,8 +16,6 @@ class GameModeSettings extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final padding = MediaQuery.paddingOf(context);
-    final wc = context.windowClass;
-    final colorScheme = Theme.of(context).colorScheme;
     final double drawerStartPadding = padding.left == 0
         ? Spacing.md
         : padding.left;
@@ -32,10 +30,11 @@ class GameModeSettings extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(context, wc, colorScheme),
-          const SizedBox(height: 4),
-          _buildSubtitle(context, wc, colorScheme),
-          const SizedBox(height: 10),
+          SectionHeading(
+            label: context.l10n.gameMode,
+            title: context.l10n.chooseMode,
+          ),
+          const SizedBox(height: Spacing.sm),
           Column(
             children: [
               for (final mode in GameMode.values) GameModeItem(mode: mode),
@@ -44,37 +43,6 @@ class GameModeSettings extends ConsumerWidget {
           const _MarathonRangeSelector(),
         ],
       ),
-    );
-  }
-
-  Widget _buildHeader(
-    BuildContext context,
-    WindowClass wc,
-    ColorScheme colorScheme,
-  ) {
-    return Row(
-      children: [
-        HugeIcon(
-          icon: HugeIcons.strokeRoundedGameController01,
-          size: 16,
-          color: colorScheme.onSurface.withValues(alpha: 0.6),
-        ),
-        const SizedBox(width: 6),
-        Text(context.l10n.gameMode, style: AppTextStyles.titleAdaptive(wc)),
-      ],
-    );
-  }
-
-  Widget _buildSubtitle(
-    BuildContext context,
-    WindowClass wc,
-    ColorScheme colorScheme,
-  ) {
-    return Text(
-      context.l10n.chooseMode,
-      style: AppTextStyles.bodyAdaptive(
-        wc,
-      ).copyWith(color: colorScheme.onSurface.withValues(alpha: 0.5)),
     );
   }
 }

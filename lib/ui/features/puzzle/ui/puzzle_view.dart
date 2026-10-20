@@ -1,7 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leafz/ui/core/layout/puzzle_layout.dart';
-import 'package:leafz/ui/core/layout/screen_type_helper.dart';
-import 'package:leafz/ui/core/layout/spacing.dart';
 import 'package:leafz/ui/features/puzzle/board/puzzle_board.dart';
 import 'package:leafz/ui/features/puzzle/view_models/puzzle_notifier.dart';
 import 'package:leafz/ui/features/puzzle/view_models/stop_watch_notifier.dart';
@@ -39,40 +37,16 @@ class _PuzzleViewState extends ConsumerState<PuzzleView> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final windowWidth = constraints.maxWidth;
-        final windowHeight = constraints.maxHeight;
-        final screenTypeHelper = ScreenTypeHelper(windowWidth, windowHeight);
-        final puzzleLayout = PuzzleLayout(screenTypeHelper: screenTypeHelper);
-        final containerWidth = puzzleLayout.containerWidth;
-
-        return Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: Spacing.puzzleMargin(screenTypeHelper.windowClass),
-            ),
-            child:
-                screenTypeHelper.windowClass == WindowClass.compact ||
-                    screenTypeHelper.windowClass == WindowClass.medium
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Spacer(),
-                      PuzzleBoard(
-                        containerWidth: containerWidth,
-                        windowClass: screenTypeHelper.windowClass,
-                      ),
-                      const Spacer(),
-                    ],
-                  )
-                : Align(
-                    alignment: const Alignment(0, -0.45),
-                    child: PuzzleBoard(
-                      containerWidth: containerWidth,
-                      windowClass: screenTypeHelper.windowClass,
-                    ),
-                  ),
-          ),
+        // Measure the space this view was given, not the window: the scaffold
+        // has already deducted the app bar, the bottom bar and the panes.
+        // Horizontal gutters belong to the scaffold's pane area, so adding
+        // another margin here would double them.
+        final layout = PuzzleLayout(
+          availableWidth: constraints.maxWidth,
+          availableHeight: constraints.maxHeight,
         );
+
+        return Center(child: PuzzleBoard(boardSide: layout.boardSide));
       },
     );
   }

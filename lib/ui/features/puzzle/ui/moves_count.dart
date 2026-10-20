@@ -10,13 +10,27 @@ class MovesCount extends ConsumerWidget {
   /// consistent peers across layouts.
   final TextStyle? textStyle;
 
-  const MovesCount({super.key, this.textStyle});
+  /// When false only the number is rendered, for layouts where a separate
+  /// label already names the stat (the editorial header).
+  final bool showLabel;
+
+  const MovesCount({super.key, this.textStyle, this.showLabel = true});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final movesCount = ref.watch(puzzleProvider.select((s) => s.movesCount));
     final style = textStyle ?? AppTextStyles.labelMedium;
+
+    if (!showLabel) {
+      return Text(
+        '$movesCount',
+        style: style.copyWith(
+          color: colorScheme.onSurface,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
+      );
+    }
 
     return RichText(
       text: TextSpan(

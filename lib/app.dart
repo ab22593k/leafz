@@ -74,19 +74,21 @@ class _AppState extends ConsumerState<App> {
           darkTheme: darkTheme,
           themeMode: themeState.mode,
           builder: (context, animatedTheme) {
-            return SafeArea(
-              child: MaterialApp.router(
-                key: ValueKey(localeKey),
-                debugShowCheckedModeBanner: false,
-                title: 'Leafz',
-                theme: animatedTheme,
-                darkTheme: animatedTheme,
-                themeMode: themeState.mode,
-                routerConfig: AppRouter.router,
-                locale: localeState.locale,
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                supportedLocales: AppLocalizations.supportedLocales,
-              ),
+            // No app-wide SafeArea: it would inset the entire tree, leaving
+            // the status-bar and gesture-bar strips unpainted and zeroing the
+            // padding every screen-level inset consumer reads. Scaffold, the
+            // app bar and the bottom bar own their own insets.
+            return MaterialApp.router(
+              key: ValueKey(localeKey),
+              debugShowCheckedModeBanner: false,
+              title: 'Leafz',
+              theme: animatedTheme,
+              darkTheme: animatedTheme,
+              themeMode: themeState.mode,
+              routerConfig: AppRouter.router,
+              locale: localeState.locale,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
             );
           },
         );

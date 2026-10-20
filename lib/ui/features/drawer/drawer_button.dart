@@ -52,7 +52,7 @@ class _DrawerButtonState extends State<DrawerButton>
           showScrim: true,
           modal: true,
           width: 480,
-          child: AppDrawer(),
+          child: AppDrawer(width: 480),
         ),
       );
     } else {

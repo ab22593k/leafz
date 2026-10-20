@@ -6,17 +6,9 @@ import 'package:leafz/ui/features/puzzle/view_models/game_mode_strategy.dart';
 import 'package:leafz/ui/features/puzzle/view_models/marathon_game_mode_strategy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// ---------------------------------------------------------------------------
-// Mocks
-// ---------------------------------------------------------------------------
-
 class MockStrategyHost extends Mock implements GameModeStrategyHost {}
 
 class MockStorageService extends Mock implements StorageService {}
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
 
 void main() {
   group('MarathonGameModeStrategy', () {

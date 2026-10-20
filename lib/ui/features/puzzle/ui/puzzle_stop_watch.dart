@@ -25,10 +25,7 @@ class PuzzleStopWatch extends ConsumerWidget {
   Widget _textWidget(String text, Color color) {
     return Text(
       text,
-      style: (textStyle ?? AppTextStyles.titleMedium).copyWith(
-        color: color,
-        fontVariations: const [FontVariation('wght', 700)],
-      ),
+      style: (textStyle ?? AppTextStyles.titleMedium).copyWith(color: color),
     );
   }
 
@@ -83,6 +80,7 @@ class PuzzleStopWatch extends ConsumerWidget {
   }) {
     if (!showIcon) return _textWidget(text, textColor);
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [icon, const SizedBox(width: 4), _textWidget(text, textColor)],
     );
   }

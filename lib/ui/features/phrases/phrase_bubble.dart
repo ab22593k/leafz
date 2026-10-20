@@ -55,10 +55,8 @@ class PhraseBubble extends ConsumerWidget {
                   phrasesNotifier.getPhrase(state, context.l10n),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.h2.copyWith(
+                  style: AppTextStyles.quote.copyWith(
                     color: colorScheme.onPrimary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
                   ),
                 )
               : const SizedBox.shrink(),

@@ -5,6 +5,7 @@ import 'package:flutter_checks/flutter_checks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leafz/data/services/storage_service.dart';
 import 'package:leafz/generated/app_localizations.dart';
+import 'package:leafz/ui/core/app_text_styles.dart';
 import 'package:leafz/ui/core/app_theme.dart';
 import 'package:leafz/ui/features/puzzle/ui/reset_puzzle_button.dart';
 import 'package:leafz/ui/features/puzzle/view_models/puzzle_notifier.dart';
@@ -117,9 +118,13 @@ void main() {
           matching: find.byType(Text),
         ),
       );
-      check(text.style?.fontFamily).equals('OpenDyslexic');
-      check(text.style?.fontSize).equals(14.0);
-      check(text.style?.fontWeight).equals(FontWeight.w600);
+      // Assert against the token, not a literal: the design system owns the
+      // family, size, and weight. Pinning literals here made the test fail
+      // the moment the UI voice changed, without the label actually
+      // regressing.
+      check(text.style?.fontFamily).equals(AppTextStyles.button.fontFamily);
+      check(text.style?.fontSize).equals(AppTextStyles.button.fontSize);
+      check(text.style?.fontWeight).equals(AppTextStyles.button.fontWeight);
     });
   });
 }

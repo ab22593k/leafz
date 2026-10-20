@@ -41,7 +41,6 @@ class CorrectTilesCount extends ConsumerWidget {
             '$correct/$total',
             style: (textStyle ?? AppTextStyles.labelSmall).copyWith(
               color: _progressColor(ratio, cs),
-              fontVariations: const [FontVariation('wght', 700)],
             ),
           ),
         ],

@@ -140,7 +140,7 @@ class AppTheme {
         statusBarBrightness: Brightness.dark,
         statusBarIconBrightness: Brightness.dark,
         systemNavigationBarIconBrightness: Brightness.dark,
-        systemNavigationBarColor: Color(0xfff9f9f9),
+        systemNavigationBarColor: AppColors.background,
       ),
     );
   }
@@ -161,7 +161,7 @@ class AppTheme {
         statusBarBrightness: Brightness.light,
         statusBarIconBrightness: Brightness.light,
         systemNavigationBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: Color(0xff131313),
+        systemNavigationBarColor: AppColorsDark.background,
       ),
     );
   }
@@ -192,7 +192,10 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
-      fontFamily: AppTextStyles.secondaryFontFamily,
+      // Default family for anything that does not name one. Explicit styles
+      // in [AppTextStyles] carry their own family, so the serif display
+      // voice survives this default.
+      fontFamily: AppTextStyles.bodyFontFamily,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: scaffoldBackground,
       appBarTheme: AppBarTheme(systemOverlayStyle: systemOverlay),
@@ -217,6 +220,8 @@ class AppTheme {
         style:
             ElevatedButton.styleFrom(
               foregroundColor: colorScheme.onPrimary,
+              // Tracked caps set by the call site; the token owns the
+              // tracking. See [AppTextStyles.button].
               textStyle: AppTextStyles.button,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
@@ -224,7 +229,7 @@ class AppTheme {
               backgroundColor: colorScheme.primary,
               elevation: 0,
               shadowColor: Colors.transparent,
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             ).copyWith(
               overlayColor: WidgetStateProperty.resolveWith((states) {
                 if (states.contains(WidgetState.hovered)) {

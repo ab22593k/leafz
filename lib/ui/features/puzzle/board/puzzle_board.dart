@@ -4,7 +4,6 @@ import 'package:leafz/ui/core/animations/animations_manager.dart';
 import 'package:leafz/ui/core/animations/pulse_transition.dart';
 import 'package:leafz/ui/core/animations/scale_up_transition.dart';
 import 'package:leafz/ui/core/layout/glass.dart';
-import 'package:leafz/ui/core/layout/screen_type_helper.dart';
 import 'package:leafz/ui/features/tile/tile_animated_positioned.dart';
 import 'package:leafz/ui/features/tile/tile_content.dart';
 import 'package:leafz/ui/features/tile/tile_gesture_detector.dart';
@@ -14,14 +13,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class PuzzleBoard extends ConsumerStatefulWidget {
-  final double containerWidth;
-  final WindowClass windowClass;
+  /// Side of the square board. Resolved by [PuzzleLayout] from the space the
+  /// parent actually has, so it can never exceed the viewport.
+  final double boardSide;
 
-  const PuzzleBoard({
-    super.key,
-    required this.containerWidth,
-    this.windowClass = WindowClass.expanded,
-  });
+  const PuzzleBoard({super.key, required this.boardSide});
 
   @override
   ConsumerState<PuzzleBoard> createState() => _PuzzleBoardState();
@@ -40,7 +36,7 @@ class _PuzzleBoardState extends ConsumerState<PuzzleBoard> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final puzzleState = ref.watch(puzzleProvider);
-    final tileWidth = widget.containerWidth / puzzleState.n;
+    final tileWidth = widget.boardSide / puzzleState.n;
     final isSolved = puzzleState.puzzle.isSolved;
     final isBlind = puzzleState.gameMode == GameMode.blind;
     final tilesBlinded = puzzleState.tilesBlinded;
@@ -123,8 +119,8 @@ class _PuzzleBoardState extends ConsumerState<PuzzleBoard> {
               filter: AppGlass.filter,
               child: Container(
                 key: const ValueKey('puzzle_board'),
-                width: widget.containerWidth,
-                height: widget.containerWidth,
+                width: widget.boardSide,
+                height: widget.boardSide,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.zero,
                   color: colorScheme.surfaceContainer.withValues(alpha: 0.55),
@@ -159,7 +155,7 @@ class _PuzzleBoardState extends ConsumerState<PuzzleBoard> {
                               isPuzzleSolved: isSolved,
                               puzzleSize: puzzleState.n,
                               isBlindContentHidden: isBlindContentHidden,
-                              windowClass: widget.windowClass,
+                              tileSide: tileWidth,
                             ),
                           ),
                         ),

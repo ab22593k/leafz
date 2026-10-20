@@ -198,7 +198,7 @@ class _LeafzScaffoldState extends State<LeafzScaffold> {
         paneDivider(context),
         Expanded(
           flex: widget.secondaryPaneFlex,
-          child: _paneArea(wc, widget.secondaryPane!),
+          child: _paneArea(wc, widget.secondaryPane!, padded: false),
         ),
       ],
     );
@@ -230,7 +230,7 @@ class _LeafzScaffoldState extends State<LeafzScaffold> {
       panes.add(
         SizedBox(
           width: widget.tertiaryFixedWidth ?? PaneSnapPoints.sideSheetMax,
-          child: _paneArea(wc, widget.tertiaryPane!),
+          child: _paneArea(wc, widget.tertiaryPane!, padded: false),
         ),
       );
     }
@@ -265,7 +265,7 @@ class _LeafzScaffoldState extends State<LeafzScaffold> {
         ),
         SizedBox(
           width: _secondaryWidth ?? fixedWidth,
-          child: _paneArea(wc, widget.secondaryPane!),
+          child: _paneArea(wc, widget.secondaryPane!, padded: false),
         ),
       ];
     }
@@ -290,12 +290,12 @@ class _LeafzScaffoldState extends State<LeafzScaffold> {
         paneDivider(context),
         SizedBox(
           width: widget.secondaryFixedWidth ?? PaneSnapPoints.fixedPane,
-          child: _paneArea(wc, widget.secondaryPane!),
+          child: _paneArea(wc, widget.secondaryPane!, padded: false),
         ),
         paneDivider(context),
         SizedBox(
           width: widget.tertiaryFixedWidth ?? PaneSnapPoints.sideSheetMax,
-          child: _paneArea(wc, widget.tertiaryPane!),
+          child: _paneArea(wc, widget.tertiaryPane!, padded: false),
         ),
       ],
     );
@@ -381,7 +381,8 @@ class _LeafzScaffoldState extends State<LeafzScaffold> {
     return wc == WindowClass.extraLarge;
   }
 
-  Widget _paneArea(WindowClass wc, Widget child) {
+  Widget _paneArea(WindowClass wc, Widget child, {bool padded = true}) {
+    if (!padded) return child;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: Spacing.screenHPaddingFor(wc)),
       child: child,

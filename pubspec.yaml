@@ -63,22 +63,16 @@ flutter:
   shaders:
     - shaders/aurora.frag
   fonts:
-    - family: PaytoneOne
+    # Editorial display voice. Variable weight axis (100–900); the app
+    # drives it through `FontVariation` rather than static cuts, so one
+    # 104 KB file covers every weight in the type scale.
+    - family: NotoSerif
       fonts:
-        - asset: assets/fonts/PaytoneOne/PaytoneOne-Regular.ttf
+        - asset: assets/fonts/NotoSerif/NotoSerif-Variable.ttf
+    # Interface voice: titles, body, labels, buttons, tile numerals.
     - family: Montserrat
       fonts:
         - asset: assets/fonts/Montserrat/Montserrat-Variable.ttf
-    - family: OpenDyslexic
-      fonts:
-        - asset: assets/fonts/OpenDyslexic/OpenDyslexic-Regular.ttf
-        - asset: assets/fonts/OpenDyslexic/OpenDyslexic-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/OpenDyslexic/OpenDyslexic-Italic.ttf
-          style: italic
-        - asset: assets/fonts/OpenDyslexic/OpenDyslexic-BoldItalic.ttf
-          weight: 700
-          style: italic
 
 flutter_icons:
   android: "launcher_icon"

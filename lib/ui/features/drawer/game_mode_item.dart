@@ -2,12 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leafz/domain/models/game_mode.dart';
 import 'package:leafz/helpers/game_mode_helper.dart';
 import 'package:leafz/helpers/localizations_ext.dart';
-import 'package:leafz/ui/core/layout/screen_type_helper.dart';
 import 'package:leafz/ui/core/app_text_styles.dart';
 import 'package:leafz/ui/features/puzzle/view_models/puzzle_notifier.dart';
 import 'package:leafz/ui/features/puzzle/view_models/stop_watch_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
 
 class GameModeItem extends ConsumerWidget {
   final GameMode mode;
@@ -16,7 +14,6 @@ class GameModeItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final wc = context.windowClass;
     final colorScheme = Theme.of(context).colorScheme;
     final puzzleState = ref.watch(puzzleProvider);
     final isSelected = puzzleState.gameMode == mode;
@@ -64,6 +61,14 @@ class GameModeItem extends ConsumerWidget {
               ).copyWith(
                 elevation: WidgetStateProperty.resolveWith((_) => 0),
                 shadowColor: WidgetStateProperty.all(Colors.transparent),
+                side: WidgetStateProperty.resolveWith(
+                  (_) => BorderSide(
+                    color: isSelected
+                        ? Colors.transparent
+                        : colorScheme.outlineVariant.withValues(alpha: 0.15),
+                    width: 0.5,
+                  ),
+                ),
                 overlayColor: WidgetStateProperty.resolveWith((states) {
                   if (states.contains(WidgetState.hovered)) {
                     return (isSelected
@@ -74,88 +79,39 @@ class GameModeItem extends ConsumerWidget {
                   return null;
                 }),
               ),
-          child: _buildItemBody(context, isSelected, colorScheme, wc),
+          child: _buildItemBody(context, isSelected, colorScheme),
         ),
       ),
     );
   }
 
-  Widget _modeIcon(bool isSelected, ColorScheme colorScheme) {
-    final color = isSelected
-        ? colorScheme.onPrimary
-        : colorScheme.onSurface.withValues(alpha: 0.6);
-
-    return switch (mode) {
-      GameMode.classic => HugeIcon(
-        icon: HugeIcons.strokeRoundedPuzzle,
-        size: 20,
-        color: color,
-      ),
-      GameMode.speedrun => HugeIcon(
-        icon: HugeIcons.strokeRoundedTimer01,
-        size: 20,
-        color: color,
-      ),
-      GameMode.blind => HugeIcon(
-        icon: HugeIcons.strokeRoundedEye,
-        size: 20,
-        color: color,
-      ),
-      GameMode.marathon => HugeIcon(
-        icon: HugeIcons.strokeRoundedLink01,
-        size: 20,
-        color: color,
-      ),
-    };
-  }
-
+  /// Name over description, both left-aligned. No mode icon and no trailing
+  /// checkmark: the ink fill already states selection, and the fill is a
+  /// luminance change rather than a hue change, so it survives both themes
+  /// and colour-vision differences.
   Widget _buildItemBody(
     BuildContext context,
     bool isSelected,
     ColorScheme colorScheme,
-    WindowClass wc,
   ) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _modeIcon(isSelected, colorScheme),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                GameModeHelper.localizedName(mode, context.l10n),
-                style: AppTextStyles.labelLarge.copyWith(
-                  color: isSelected
-                      ? colorScheme.onPrimary
-                      : colorScheme.onSurface,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  fontVariations: [
-                    FontVariation('wght', isSelected ? 700 : 550),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 1),
-              Text(
-                GameModeHelper.localizedDescription(mode, context.l10n),
-                style: AppTextStyles.bodyAdaptive(wc).copyWith(
-                  color: isSelected
-                      ? colorScheme.onPrimary.withValues(alpha: 0.7)
-                      : colorScheme.onSurface.withValues(alpha: 0.45),
-                ),
-              ),
-            ],
+        Text(
+          GameModeHelper.localizedName(mode, context.l10n),
+          style: AppTextStyles.listTitle.copyWith(
+            color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
           ),
         ),
-        if (isSelected)
-          Padding(
-            padding: const EdgeInsets.only(left: 4),
-            child: HugeIcon(
-              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-              size: 16,
-              color: colorScheme.onPrimary,
-            ),
+        const SizedBox(height: 2),
+        Text(
+          GameModeHelper.localizedDescription(mode, context.l10n),
+          style: AppTextStyles.bodySmall.copyWith(
+            color: isSelected
+                ? colorScheme.onPrimary.withValues(alpha: 0.7)
+                : colorScheme.onSurface.withValues(alpha: 0.45),
           ),
+        ),
       ],
     );
   }

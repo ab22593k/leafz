@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:leafz/helpers/localizations_ext.dart';
 import 'package:leafz/ui/core/layout/glass.dart';
@@ -10,85 +10,94 @@ import 'package:leafz/ui/features/drawer/language_picker.dart';
 import 'package:leafz/ui/features/drawer/latest_scores.dart';
 import 'package:leafz/ui/features/drawer/puzzle_size_settings.dart';
 import 'package:leafz/ui/core/layout/spacing.dart';
-import 'package:leafz/ui/core/layout/screen_type_helper.dart';
 import 'package:leafz/ui/core/app_text_styles.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key});
+  /// Explicit width for hosts that already constrain the drawer (the floating
+  /// pane used on expanded layouts). When null, the drawer sizes itself from
+  /// the window.
+  final double? width;
 
-  /// Fraction of the window width used on compact/medium breakpoints.
-  static const double _drawerWidthFraction = 0.82;
+  const AppDrawer({super.key, this.width});
 
-  /// Fixed drawer width on expanded+ breakpoints.
-  static const double _drawerMaxWidth = 500;
+  /// Fraction of the window width the drawer takes on a phone.
+  static const double _drawerWidthFraction = 0.86;
 
-  Widget _drawerHeader(double drawerStartPadding) {
-    return _DrawerHeader(drawerStartPadding: drawerStartPadding);
-  }
+  /// Hard ceiling. A drawer is a control surface, not a co-planar pane: at
+  /// tablet widths a fraction alone produced a 684dp drawer that buried the
+  /// board it was opening over.
+  static const double _drawerMaxWidth = 400;
 
   @override
   Widget build(BuildContext context) {
-    final padding = MediaQuery.paddingOf(context);
-    final windowSize = MediaQuery.sizeOf(context);
-    final windowClass = context.windowClass;
-    final isWideLayout = windowSize.width > windowSize.height;
-    double drawerStartPadding = padding.left == 0 ? Spacing.md : padding.left;
+    final insets = MediaQuery.paddingOf(context);
+    final scaffold = Scaffold.maybeOf(context);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final startInset = isRtl ? insets.right : insets.left;
+    final endInset = isRtl ? insets.left : insets.right;
+    final drawerStartPadding = startInset == 0 ? Spacing.md : startInset;
     final colorScheme = Theme.of(context).colorScheme;
+    final drawerWidth =
+        width ??
+        math.min(
+          MediaQuery.sizeOf(context).width * _drawerWidthFraction,
+          _drawerMaxWidth,
+        );
 
-    return SafeArea(
-      left: false,
-      child: ClipRRect(
-        borderRadius: BorderRadius.zero,
-        child: BackdropFilter(
-          filter: AppGlass.filter,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              // Drawer width follows the window class, not the drawer's own
-              // constraints (which reflect the drawer, not the window).
-              final drawerWidth = switch (windowClass) {
-                WindowClass.compact ||
-                WindowClass.medium => windowSize.width * _drawerWidthFraction,
-                _ => _drawerMaxWidth,
-              };
+    // The app bar paints above the drawer, so the masthead has to clear it.
+    // `appBarMaxHeight` already includes the status-bar inset; when the
+    // drawer is hosted elsewhere (the floating pane) there is no app bar and
+    // the system inset is the only thing to avoid.
+    final contentTop = scaffold?.appBarMaxHeight ?? insets.top;
 
-              return Container(
-                width: drawerWidth,
-                margin:
-                    kIsWeb ||
-                        Platform.isAndroid ||
-                        Platform.isMacOS ||
-                        Platform.isLinux
-                    ? const EdgeInsets.symmetric(vertical: 16)
-                    : EdgeInsets.only(top: isWideLayout ? padding.bottom : 0),
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainer.withValues(alpha: 0.7),
-                  borderRadius: BorderRadius.zero,
-                ),
-                child: Column(
-                  children: [
-                    _drawerHeader(drawerStartPadding),
-                    const Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            PuzzleSizeSettings(),
-                            GameModeSettings(),
-                            LanguagePicker(),
-                            DarkModeToggle(),
-                            SizedBox(height: 8),
-                            LatestScores(),
-                          ],
-                        ),
+    // Scaffold lays the drawer slot out with *tight* full-window constraints,
+    // so a width set on a descendant Container is silently discarded. The
+    // Align is what lets the sheet be narrower than the slot and expose the
+    // scrim strip that marks it as dismissible.
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: SizedBox(
+        width: drawerWidth,
+        child: ClipRRect(
+          borderRadius: BorderRadius.zero,
+          child: BackdropFilter(
+            filter: AppGlass.filter,
+            child: Container(
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainer.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.zero,
+              ),
+              child: Column(
+                children: [
+                  _DrawerHeader(
+                    startPadding: drawerStartPadding,
+                    endPadding: Spacing.md + endInset,
+                    topPadding: contentTop + Spacing.xl,
+                  ),
+                  const Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          PuzzleSizeSettings(),
+                          GameModeSettings(),
+                          LanguagePicker(),
+                          DarkModeToggle(),
+                          SizedBox(height: 8),
+                          LatestScores(),
+                        ],
                       ),
                     ),
-                    _DrawerFooter(drawerStartPadding: drawerStartPadding),
-                  ],
-                ),
-              );
-            },
+                  ),
+                  _DrawerFooter(
+                    startPadding: drawerStartPadding,
+                    endPadding: Spacing.md + endInset,
+                    bottomPadding: Spacing.md + insets.bottom,
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -97,80 +106,58 @@ class AppDrawer extends StatelessWidget {
 }
 
 class _DrawerHeader extends StatelessWidget {
-  final double drawerStartPadding;
+  final double startPadding;
+  final double endPadding;
+  final double topPadding;
 
-  const _DrawerHeader({required this.drawerStartPadding});
+  const _DrawerHeader({
+    required this.startPadding,
+    required this.endPadding,
+    required this.topPadding,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final wc = context.windowClass;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      padding: EdgeInsets.only(
-        left: drawerStartPadding,
-        right: Spacing.xl,
-        top: Spacing.xl,
+      padding: EdgeInsetsDirectional.only(
+        start: startPadding,
+        end: endPadding,
+        top: topPadding,
         bottom: Spacing.lg,
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildLogo(colorScheme),
-          const SizedBox(width: 12),
-          _buildTitleSection(context, wc, colorScheme),
+          Expanded(child: _buildMasthead(context, colorScheme)),
           _buildCloseButton(context, colorScheme),
         ],
       ),
     );
   }
 
-  Widget _buildLogo(ColorScheme colorScheme) {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: colorScheme.primary,
-        borderRadius: BorderRadius.zero,
-      ),
-      child: Center(
-        child: Text(
-          'D',
-          style: AppTextStyles.headlineLarge.copyWith(
-            color: colorScheme.onPrimary,
+  /// Masthead: rubric over wordmark. The old square "logo" tile was a
+  /// placeholder glyph; the product name set in the display face does the
+  /// same job with actual brand voice.
+  Widget _buildMasthead(BuildContext context, ColorScheme colorScheme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.l10n.appSubtitle.toUpperCase(),
+          style: AppTextStyles.kicker.copyWith(
+            color: colorScheme.onSurface.withValues(alpha: 0.45),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildTitleSection(
-    BuildContext context,
-    WindowClass wc,
-    ColorScheme colorScheme,
-  ) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.appTitle,
-            style:
-                (wc == WindowClass.compact
-                        ? AppTextStyles.titleMedium
-                        : AppTextStyles.titleLarge)
-                    .copyWith(
-                      fontVariations: const [FontVariation('wght', 700)],
-                    ),
+        const SizedBox(height: Spacing.xxs),
+        Text(
+          context.l10n.appTitle,
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: colorScheme.onSurface,
           ),
-          const SizedBox(height: 1),
-          Text(
-            context.l10n.appSubtitle,
-            style: AppTextStyles.bodyAdaptive(
-              wc,
-            ).copyWith(fontVariations: const [FontVariation('wght', 400)]),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -186,18 +173,24 @@ class _DrawerHeader extends StatelessWidget {
 }
 
 class _DrawerFooter extends StatelessWidget {
-  final double drawerStartPadding;
+  final double startPadding;
+  final double endPadding;
+  final double bottomPadding;
 
-  const _DrawerFooter({required this.drawerStartPadding});
+  const _DrawerFooter({
+    required this.startPadding,
+    required this.endPadding,
+    required this.bottomPadding,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(
-        left: drawerStartPadding,
-        right: Spacing.md,
+      padding: EdgeInsetsDirectional.only(
+        start: startPadding,
+        end: endPadding,
         top: Spacing.sm,
-        bottom: Spacing.md + MediaQuery.paddingOf(context).bottom / 2,
+        bottom: bottomPadding,
       ),
       child: const Row(
         // Version pinned left, attribution right — the decorative rocket
