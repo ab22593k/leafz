@@ -8,7 +8,6 @@ import 'package:leafz/ui/core/layout/screen_type_helper.dart';
 import 'package:leafz/ui/features/puzzle/view_models/puzzle_notifier.dart';
 import 'package:leafz/ui/features/puzzle/view_models/stop_watch_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
 
 class ResetPuzzleButton extends ConsumerWidget {
   const ResetPuzzleButton({super.key});
@@ -52,40 +51,58 @@ class ResetPuzzleButton extends ConsumerWidget {
     bool isExpandedPlus,
     ColorScheme colorScheme,
   ) {
+    // One labelled primary action in both layouts: the old compact
+    // icon-only button forced new players to guess the glyph. The text
+    // label costs ~90dp and fits even at 320dp because the wordmark flexes.
+    // No outer top padding — the bar's Row centers its children, and the
+    // offset pushed the button off-axis.
+    final label = Text(
+      context.l10n.reset.toUpperCase(),
+      style: AppTextStyles.button,
+    );
+    final tooltip = '${context.l10n.reset} (R)';
+
     if (isExpandedPlus) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 200),
-          child: FloatingActionButton.extended(
+      // Full-bleed ink block for the side pane: the pane gives it 300dp+,
+      // so the label's tracked caps read as a colophon rule, not a chip.
+      // TextButton, not FAB — a floating action is the wrong voice inside
+      // a static editorial column.
+      return Tooltip(
+        message: tooltip,
+        child: SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: TextButton(
             key: const ValueKey('reset_button'),
             onPressed: () => initResetPuzzle(context, ref),
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.zero,
+            style: TextButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              // Fixed size: the label must not reflow the column when the
+              // locale changes the word length.
+              fixedSize: const Size.fromHeight(48),
+              minimumSize: const Size(0, 48),
             ),
-            label: Text(context.l10n.reset, style: AppTextStyles.button),
+            child: Align(alignment: Alignment.centerRight, child: label),
           ),
         ),
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: Tooltip(
-        message: context.l10n.reset,
-        child: FloatingActionButton.small(
-          key: const ValueKey('reset_button'),
-          onPressed: () => initResetPuzzle(context, ref),
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-          child: const HugeIcon(
-            icon: HugeIcons.strokeRoundedRefresh03,
-            size: 18,
-          ),
-        ),
+    return Tooltip(
+      message: tooltip,
+      preferBelow: false,
+      child: FloatingActionButton.extended(
+        key: const ValueKey('reset_button'),
+        onPressed: () => initResetPuzzle(context, ref),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        label: label,
       ),
     );
   }

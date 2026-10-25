@@ -17,14 +17,18 @@ class DarkModeToggle extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final padding = MediaQuery.paddingOf(context);
-    final drawerStartPadding = padding.left == 0 ? Spacing.md : padding.left;
+    // Start-aware like the header: padding.left misaligned Arabic content
+    // against the end-aware masthead.
+    final insets = MediaQuery.paddingOf(context);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final startInset = isRtl ? insets.right : insets.left;
+    final drawerStartPadding = startInset == 0 ? Spacing.md : startInset;
     final themeState = ref.watch(themeProvider);
 
     return Container(
-      padding: EdgeInsets.only(
-        right: Spacing.md,
-        left: drawerStartPadding,
+      padding: EdgeInsetsDirectional.only(
+        start: drawerStartPadding,
+        end: Spacing.md,
         top: Spacing.md,
         bottom: Spacing.md,
       ),

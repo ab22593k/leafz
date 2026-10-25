@@ -15,16 +15,18 @@ class GameModeSettings extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final padding = MediaQuery.paddingOf(context);
-    final double drawerStartPadding = padding.left == 0
-        ? Spacing.md
-        : padding.left;
+    // Drawer sections align to the *start* edge: padding.left here put
+    // Arabic section content 22dp off the header's end-aware masthead.
+    final insets = MediaQuery.paddingOf(context);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final startInset = isRtl ? insets.right : insets.left;
+    final double drawerStartPadding = startInset == 0 ? Spacing.md : startInset;
 
     return Container(
-      padding: EdgeInsets.only(
-        right: Spacing.md,
-        left: drawerStartPadding,
-        top: Spacing.sm,
+      padding: EdgeInsetsDirectional.only(
+        start: drawerStartPadding,
+        end: Spacing.md,
+        top: Spacing.md,
         bottom: Spacing.md,
       ),
       child: Column(
@@ -35,7 +37,10 @@ class GameModeSettings extends ConsumerWidget {
             title: context.l10n.chooseMode,
           ),
           const SizedBox(height: Spacing.sm),
+          // Gaps live on the parent so items stay identical: the old
+          // per-item bottom padding broke the last item's rhythm.
           Column(
+            spacing: Spacing.xxs,
             children: [
               for (final mode in GameMode.values) GameModeItem(mode: mode),
             ],
@@ -66,7 +71,10 @@ class _MarathonRangeSelector extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Container(
-        padding: const EdgeInsets.all(10),
+        // No start padding: the Range label locks to the same edge as the
+        // mode titles above, so selecting Marathon doesn't shift the
+        // column's left register.
+        padding: const EdgeInsetsDirectional.only(top: 10, bottom: 10, end: 10),
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.zero,

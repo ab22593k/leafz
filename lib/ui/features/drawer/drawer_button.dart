@@ -10,10 +10,9 @@ class DrawerButton extends StatelessWidget {
 
   static const _key = ValueKey('drawer_button');
 
-  /// On compact/medium the settings open as a navigation drawer (the
-  /// docked pane slides in from the leading edge). On expanded+ where the
-  /// drawer is hidden, the same content levitates into a floating pane —
-  /// same destination, different presentation per breakpoint.
+  /// Menu entry point. The tooltip names the destination (settings live
+  /// behind this button) and the shortcut the board already handles — the
+  /// old bare "Menu" label forced a tap to learn either.
   void _openSettings(BuildContext context) {
     final isExpandedPlus = context.isExpandedPlus;
 
@@ -38,7 +37,7 @@ class DrawerButton extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Tooltip(
-      message: context.l10n.menu,
+      message: '${context.l10n.menu} (D)',
       preferBelow: false,
       child: ElevatedButton(
         key: DrawerButton._key,

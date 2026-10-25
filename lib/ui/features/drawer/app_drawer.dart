@@ -84,7 +84,9 @@ class AppDrawer extends StatelessWidget {
                           GameModeSettings(),
                           LanguagePicker(),
                           DarkModeToggle(),
-                          SizedBox(height: 8),
+                          // A full blank line before the record: the scores
+                          // are the drawer's coda, not a sixth setting.
+                          SizedBox(height: Spacing.section),
                           LatestScores(),
                         ],
                       ),

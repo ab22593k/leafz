@@ -288,17 +288,20 @@ class PuzzleHeader extends ConsumerWidget {
     );
   }
 
-  /// Rubric over numeral — the sidebar's typographic unit.
+  /// Rubric over numeral — the sidebar's typographic unit. Right-aligned:
+  /// the eye locks the numerals to the board's leading edge instead of
+  /// chasing three staggered left starts.
   Widget _labeledStatRow({
     required String label,
     required ColorScheme colorScheme,
     required Widget child,
   }) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(
           label.toUpperCase(),
+          textAlign: TextAlign.right,
           style: AppTextStyles.kicker.copyWith(
             color: colorScheme.onSurface.withValues(alpha: 0.45),
           ),
@@ -306,6 +309,7 @@ class PuzzleHeader extends ConsumerWidget {
         const SizedBox(height: Spacing.xs),
         DefaultTextStyle(
           style: AppTextStyles.statValue.copyWith(color: colorScheme.onSurface),
+          textAlign: TextAlign.right,
           child: child,
         ),
       ],

@@ -25,9 +25,9 @@ class LatestScoreItem extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      padding: EdgeInsets.only(
-        left: paddingLeft,
-        right: Spacing.screenHPadding + 4,
+      padding: EdgeInsetsDirectional.only(
+        start: paddingLeft,
+        end: Spacing.screenHPadding + 4,
         top: Spacing.sm + 2,
         bottom: Spacing.sm + 2,
       ),

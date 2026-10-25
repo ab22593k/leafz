@@ -12,8 +12,12 @@ class LatestScores extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final padding = MediaQuery.paddingOf(context);
-    final double paddingLeft = padding.left == 0 ? Spacing.md : padding.left;
+    // Start-aware like the header: padding.left misaligned Arabic content
+    // against the end-aware masthead.
+    final insets = MediaQuery.paddingOf(context);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final startInset = isRtl ? insets.right : insets.left;
+    final double paddingLeft = startInset == 0 ? Spacing.md : startInset;
     final scores = ref.watch(
       puzzleProvider.select((s) => s.scores.reversed.toList()),
     );
@@ -24,15 +28,15 @@ class LatestScores extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: EdgeInsets.only(
-              left: paddingLeft,
-              right: Spacing.screenHPadding,
+            padding: EdgeInsetsDirectional.only(
+              start: paddingLeft,
+              end: Spacing.screenHPadding,
               bottom: Spacing.sm,
             ),
             child: SectionHeading(label: context.l10n.latestScores),
           ),
           if (scores.isEmpty)
-            _emptyState(context, paddingLeft)
+            _emptyState(context)
           else
             ListView.builder(
               shrinkWrap: true,
@@ -53,20 +57,29 @@ class LatestScores extends ConsumerWidget {
   /// Typographic empty state.
   ///
   /// An illustration would be a second decorative voice next to the serif
-  /// heading; here the section states what is missing and what will fill it.
-  Widget _emptyState(BuildContext context, double paddingLeft) {
+  /// heading; here the section states what is missing and what will fill
+  /// it. A ghost rule and a gutter inset make it a margin note, not a card
+  /// competing with the sections above.
+  Widget _emptyState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      margin: EdgeInsets.only(
-        left: paddingLeft,
-        right: Spacing.screenHPadding,
+      margin: const EdgeInsetsDirectional.only(
+        end: Spacing.screenHPadding,
         top: Spacing.xs,
       ),
-      padding: const EdgeInsets.all(Spacing.md),
+      padding: const EdgeInsetsDirectional.only(
+        start: Spacing.md,
+        top: Spacing.sm,
+        bottom: Spacing.sm,
+      ),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.zero,
+        border: BorderDirectional(
+          start: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.15),
+            width: 0.5,
+          ),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

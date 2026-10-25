@@ -18,15 +18,19 @@ class LanguagePicker extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final padding = MediaQuery.paddingOf(context);
-    final drawerStartPadding = padding.left == 0 ? Spacing.md : padding.left;
+    // Start-aware like the header: padding.left misaligned Arabic content
+    // against the end-aware masthead.
+    final insets = MediaQuery.paddingOf(context);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final startInset = isRtl ? insets.right : insets.left;
+    final drawerStartPadding = startInset == 0 ? Spacing.md : startInset;
     final localeState = ref.watch(localeProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      padding: EdgeInsets.only(
-        right: Spacing.md,
-        left: drawerStartPadding,
+      padding: EdgeInsetsDirectional.only(
+        start: drawerStartPadding,
+        end: Spacing.md,
         top: Spacing.md,
         bottom: Spacing.md,
       ),
@@ -89,6 +93,11 @@ class _Language {
   const _Language({required this.code, required this.label});
 }
 
+/// Text-only choice.
+///
+/// No minimum tap height: this sits inside a 44dp segmented control, so a
+/// second 44dp target would double the row's height for no reason. Ink fill
+/// states selection; ghost borders give the resting options their edge.
 class _LanguageButton extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -111,7 +120,7 @@ class _LanguageButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.zero,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.zero,
             border: Border.all(

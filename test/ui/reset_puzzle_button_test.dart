@@ -10,7 +10,6 @@ import 'package:leafz/ui/core/app_theme.dart';
 import 'package:leafz/ui/features/puzzle/ui/reset_puzzle_button.dart';
 import 'package:leafz/ui/features/puzzle/view_models/puzzle_notifier.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:hugeicons/hugeicons.dart';
 
 class _MockStorageService extends Mock implements StorageService {}
 
@@ -58,28 +57,37 @@ extension on WidgetTester {
 }
 
 void main() {
-  group('ResetPuzzleButton — desktop layout', () {
-    testWidgets('uses extended FAB with no icon', (tester) async {
+  group('ResetPuzzleButton — one labelled action, two voices', () {
+    testWidgets('compact layout labels the button', (tester) async {
+      await tester.pumpWidget(buildTest(screenWidth: 390)());
+      await tester.settle();
+
+      expect(find.text('RESET'), findsOneWidget);
+      check(find.byIcon(Icons.refresh)).findsNothing();
+    });
+
+    testWidgets('desktop layout is a full-bleed ink block', (tester) async {
       await tester.pumpWidget(buildTest(screenWidth: 900)());
       await tester.settle();
 
-      final fab = tester.widget<FloatingActionButton>(
+      final button = tester.widget<TextButton>(
         find.byKey(const ValueKey('reset_button')),
       );
-
-      check(fab).isNotNull();
-      check(find.byType(HugeIcon)).findsNothing();
-      check(find.byIcon(Icons.refresh)).findsNothing();
+      check(button).isNotNull();
+      expect(find.text('RESET'), findsOneWidget);
+      // A floating action is the wrong voice inside a static editorial
+      // column; the side pane gets a flat ink block instead.
+      check(find.byType(FloatingActionButton)).findsNothing();
     });
 
     testWidgets('has zero border radius', (tester) async {
       await tester.pumpWidget(buildTest(screenWidth: 900)());
       await tester.settle();
 
-      final fab = tester.widget<FloatingActionButton>(
+      final button = tester.widget<TextButton>(
         find.byKey(const ValueKey('reset_button')),
       );
-      final shape = fab.shape as RoundedRectangleBorder;
+      final shape = button.style?.shape?.resolve({}) as RoundedRectangleBorder;
       check(shape.borderRadius).equals(BorderRadius.zero);
     });
 
@@ -87,7 +95,7 @@ void main() {
       await tester.pumpWidget(buildTest(screenWidth: 900)());
       await tester.settle();
 
-      expect(find.text('Reset'), findsOneWidget);
+      expect(find.text('RESET'), findsOneWidget);
     });
 
     testWidgets('uses primary as background and onPrimary as foreground', (
@@ -96,16 +104,20 @@ void main() {
       await tester.pumpWidget(buildTest(screenWidth: 900)());
       await tester.settle();
 
-      final fab = tester.widget<FloatingActionButton>(
+      final button = tester.widget<TextButton>(
         find.byKey(const ValueKey('reset_button')),
       );
-      final fabElement = tester.element(
+      final buttonElement = tester.element(
         find.byKey(const ValueKey('reset_button')),
       );
-      final theme = Theme.of(fabElement);
+      final theme = Theme.of(buttonElement);
 
-      check(fab.backgroundColor).equals(theme.colorScheme.primary);
-      check(fab.foregroundColor).equals(theme.colorScheme.onPrimary);
+      check(
+        button.style?.backgroundColor?.resolve({}),
+      ).equals(theme.colorScheme.primary);
+      check(
+        button.style?.foregroundColor?.resolve({}),
+      ).equals(theme.colorScheme.onPrimary);
     });
 
     testWidgets('uses AppTextStyles.button for label', (tester) async {

@@ -5,6 +5,7 @@ import 'package:leafz/ui/core/app_text_styles.dart';
 import 'package:leafz/ui/core/layout/bars.dart';
 import 'package:leafz/ui/core/layout/scaffold.dart';
 import 'package:leafz/ui/core/layout/panes.dart';
+import 'package:leafz/ui/core/layout/screen_type_helper.dart';
 import 'package:leafz/ui/core/layout/spacing.dart';
 import 'package:leafz/ui/features/background/background_stack.dart';
 import 'package:leafz/ui/features/drawer/app_drawer.dart';
@@ -32,6 +33,13 @@ class HomePage extends StatelessWidget {
         // board cramped. Let the pane take a third of the width, bounded on
         // both ends, and the board keep the rest.
         final secondaryWidth = (size.width * 0.30).clamp(300.0, 440.0);
+        // The reset action lives next to the stats it restarts: on expanded+
+        // the side pane owns it, so the app bar stays a masthead + menu and
+        // stops competing with the board for the primary weight.
+        final isExpandedPlus = ScreenTypeHelper(
+          size.width,
+          size.height,
+        ).isExpandedPlus;
 
         return Stack(
           children: [
@@ -40,12 +48,10 @@ class HomePage extends StatelessWidget {
               topBar: PuzzleAppBar(
                 leading: const DrawerButton(),
                 title: context.l10n.appTitle,
-                actions: const [
-                  Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: ResetPuzzleButton(),
-                  ),
-                ],
+                // No wrapper padding: the bar's Row centers its children, and
+                // the old 8dp inset pushed the button off-axis while stealing
+                // 16dp of bar height.
+                actions: [if (!isExpandedPlus) const ResetPuzzleButton()],
               ),
               bottomBar: const PuzzleToolbar(child: PuzzleHeader()),
               // On expanded+ the bottom bar is hidden and the stats live in
@@ -79,6 +85,18 @@ class HomePage extends StatelessWidget {
 ///
 /// Everything shown is live state (mode, grid size, elapsed time, moves,
 /// solved tiles). Nothing here is a decorative metric.
+///
+/// The masthead names the *run* (mode + grid), not the product: the wordmark
+/// already owns the app bar. One right edge for the whole pane — masthead,
+/// numerals, and the reset rule all lock to the board's leading edge; the
+/// old left-aligned column made the eye chase three staggered starts.
+///
+/// The run's primary action closes the column: Reset sits under the stats
+/// it restarts, so proximity — not a shared bar — states the relationship.
+/// The side pane gives it 300dp+, so the tracked-caps label reads as a
+/// full-bleed colophon rule: flat ink block, right-aligned text, zero
+/// radius. The compact layout keeps a floating action in the app bar, where
+/// there is no pane to anchor a static block.
 class _StatsPane extends ConsumerWidget {
   const _StatsPane();
 
@@ -97,27 +115,37 @@ class _StatsPane extends ConsumerWidget {
         horizontal: Spacing.md,
         vertical: Spacing.xl,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Rubric + display line: the pane reads as a magazine sidebar
-          // rather than a metrics card. No border, no panel, no icon.
-          Text(
-            modeName.toUpperCase(),
-            style: AppTextStyles.kicker.copyWith(
-              color: colorScheme.onSurface.withValues(alpha: 0.45),
+      // Scrolls only when the window is too short for the column (e.g. a
+      // squat landscape window): on normal heights everything fits and no
+      // scroll physics engage. Without this the added reset rule would clip
+      // instead of scrolling.
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Rubric + display line: the pane reads as a magazine sidebar
+            // rather than a metrics card. No border, no panel, no icon.
+            Text(
+              modeName.toUpperCase(),
+              textAlign: TextAlign.right,
+              style: AppTextStyles.kicker.copyWith(
+                color: colorScheme.onSurface.withValues(alpha: 0.45),
+              ),
             ),
-          ),
-          const SizedBox(height: Spacing.xxs),
-          Text(
-            '$size \u00d7 $size',
-            style: AppTextStyles.displaySmall.copyWith(
-              color: colorScheme.onSurface,
+            const SizedBox(height: Spacing.xxs),
+            Text(
+              '$size \u00d7 $size',
+              textAlign: TextAlign.right,
+              style: AppTextStyles.displaySmall.copyWith(
+                color: colorScheme.onSurface,
+              ),
             ),
-          ),
-          const SizedBox(height: Spacing.section),
-          const PuzzleHeader(displayMode: HeaderDisplay.sidePane),
-        ],
+            const SizedBox(height: Spacing.section),
+            const PuzzleHeader(displayMode: HeaderDisplay.sidePane),
+            const SizedBox(height: Spacing.xl),
+            const ResetPuzzleButton(),
+          ],
+        ),
       ),
     );
   }
