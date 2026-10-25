@@ -70,6 +70,12 @@ class PuzzleSizeItem extends ConsumerWidget {
               backgroundColor: isSelected
                   ? colorScheme.primary
                   : Colors.transparent,
+              // Locked sizes restate the resting ghost instead of the
+              // framework's washed-out disabled treatment.
+              disabledBackgroundColor: Colors.transparent,
+              disabledForegroundColor: colorScheme.onSurface.withValues(
+                alpha: 0.45,
+              ),
               elevation: 0,
             ).copyWith(
               elevation: WidgetStateProperty.resolveWith((_) => 0),

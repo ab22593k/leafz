@@ -107,10 +107,15 @@ class _TileContentState extends State<TileContent>
     final textSize = PuzzleLayout.tileTextSize(widget.tileSide);
 
     if (widget.isBlindContentHidden) {
-      return Icon(
-        Icons.help_outline,
-        size: textSize * 0.6,
-        color: colorScheme.onSurface.withValues(alpha: 0.25),
+      // A serif interrogative carries the hidden numeral's weight: the tile
+      // stays ink-on-glass in the display voice instead of dropping to a
+      // generic outline icon from a different visual language.
+      return Text(
+        '?',
+        style: AppTextStyles.tile.copyWith(
+          fontSize: textSize * 0.6,
+          color: colorScheme.onSurface.withValues(alpha: 0.25),
+        ),
       );
     }
 

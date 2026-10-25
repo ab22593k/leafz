@@ -57,6 +57,13 @@ class GameModeItem extends ConsumerWidget {
                 foregroundColor: isSelected
                     ? colorScheme.onPrimary
                     : colorScheme.onSurface,
+                // Locked options keep the editorial treatment: the
+                // framework's default disabled wash would break the ink
+                // register, so disabled states reuse the resting ghost.
+                disabledBackgroundColor: Colors.transparent,
+                disabledForegroundColor: colorScheme.onSurface.withValues(
+                  alpha: 0.45,
+                ),
                 elevation: 0,
               ).copyWith(
                 elevation: WidgetStateProperty.resolveWith((_) => 0),
@@ -88,7 +95,9 @@ class GameModeItem extends ConsumerWidget {
   /// Name over description, both left-aligned. No mode icon and no trailing
   /// checkmark: the ink fill already states selection, and the fill is a
   /// luminance change rather than a hue change, so it survives both themes
-  /// and colour-vision differences.
+  /// and colour-vision differences. A locked option is stated by the same
+  /// lowered contrast the rest of the system uses for secondary text, not
+  /// by the framework's washed-out disabled treatment.
   Widget _buildItemBody(
     BuildContext context,
     bool isSelected,

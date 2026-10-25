@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leafz/ui/core/app_text_styles.dart';
 import 'package:leafz/ui/features/puzzle/view_models/puzzle_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
 
 class CorrectTilesCount extends ConsumerWidget {
   final ColorScheme? colorScheme;
@@ -64,36 +63,26 @@ class CorrectTilesCount extends ConsumerWidget {
   Widget _progressIcon(double ratio, ColorScheme colorScheme) {
     final color = _progressColor(ratio, colorScheme);
     return switch (ratio) {
+      // Solved seal: solid ink block. Selection and completion are both
+      // stated by fill strength, never by icon glyphs — a check or star
+      // would be decoration on top of a state the tonal ladder already
+      // carries.
       >= 1.0 => Container(
         width: 14,
         height: 14,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.zero,
-        ),
-        child: HugeIcon(
-          icon: HugeIcons.strokeRoundedStarAward01,
-          size: 10,
-          color: colorScheme.onPrimary,
-        ),
+        decoration: BoxDecoration(color: color),
       ),
+      // Near-complete: the same block at rest, drawn as a ghost frame.
       >= 0.75 => Container(
         width: 14,
         height: 14,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.zero,
-          border: Border.all(color: color, width: 1.5),
-        ),
-        child: HugeIcon(
-          icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-          size: 10,
-          color: colorScheme.onSurface.withValues(alpha: 0.54),
-        ),
+        decoration: BoxDecoration(border: Border.all(color: color, width: 1)),
       ),
-      _ => HugeIcon(
-        icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-        size: 14,
-        color: color,
+      // In progress: ink block at the ladder's current strength.
+      _ => Container(
+        width: 14,
+        height: 14,
+        decoration: BoxDecoration(color: color.withValues(alpha: 0.35)),
       ),
     };
   }
